@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+
+@layer base {
+  :root {
+    /* Cockpit Dark Theme */
+    --background: 220 25% 8%;
+    --foreground: 45 100% 95%;
+
+    --card: 220 20% 12%;
+    --card-foreground: 45 100% 95%;
+
+    --popover: 220 20% 10%;
+    --popover-foreground: 45 100% 95%;
+
+    /* Amber - Primary cockpit instrument color */
+    --primary: 35 100% 50%;
+    --primary-foreground: 220 25% 8%;
+
+    /* Cyan - Digital display color */
+    --secondary: 185 100% 50%;
+    --secondary-foreground: 220 25% 8%;
+
+    /* Muted panels */
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 60%;
+
+    /* Accent - Soft blue glow */
+    --accent: 200 80% 40%;
+    --accent-foreground: 45 100% 95%;
+
+    /* Status colors */
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 140 70% 45%;
+    --success-foreground: 220 25% 8%;
+
+    --warning: 45 100% 50%;
+    --warning-foreground: 220 25% 8%;
+
+    --border: 220 15% 25%;
+    --input: 220 15% 20%;
+    --ring: 35 100% 50%;
+
+    --radius: 0.5rem;
+
+    /* Custom cockpit variables */
+    --glow-amber: 0 0 20px hsl(35 100% 50% / 0.5);
+    --glow-cyan: 0 0 20px hsl(185 100% 50% / 0.5);
+    --glow-green: 0 0 15px hsl(140 70% 45% / 0.6);
+    --glow-red: 0 0 20px hsl(0 85% 55% / 0.6);
+    
+    --panel-gradient: linear-gradient(180deg, hsl(220 20% 14%) 0%, hsl(220 25% 8%) 100%);
+    --instrument-border: 1px solid hsl(220 15% 30%);
+    --screen-scanline: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(185 100% 50% / 0.03) 2px,
+      hsl(185 100% 50% / 0.03) 4px
+    );
+
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 45 100% 95%;
+    --sidebar-primary: 35 100% 50%;
+    --sidebar-primary-foreground: 220 25% 8%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 45 100% 95%;
+    --sidebar-border: 220 15% 25%;
+    --sidebar-ring: 35 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+  }
+}
+
+@layer components {
+  .cockpit-panel {
+    @apply bg-card rounded-lg border border-border;
+    background: var(--panel-gradient);
+    box-shadow: inset 0 1px 0 hsl(220 15% 30% / 0.5),
+                0 4px 20px hsl(0 0% 0% / 0.5);
+  }
+
+  .cockpit-screen {
+    @apply relative overflow-hidden rounded bg-black/50;
+    border: var(--instrument-border);
+  }
+
+  .cockpit-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--screen-scanline);
+    pointer-events: none;
+  }
+
+  .switch-on {
+    @apply bg-success text-success-foreground;
+    box-shadow: var(--glow-green);
+  }
+
+  .switch-off {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .switch-warning {
+    @apply bg-warning text-warning-foreground;
+    box-shadow: var(--glow-amber);
+    animation: pulse-glow 1.5s ease-in-out infinite;
+  }
+
+  .switch-danger {
+    @apply bg-destructive text-destructive-foreground;
+    box-shadow: var(--glow-red);
+    animation: pulse-glow 0.8s ease-in-out infinite;
+  }
+
+  .digital-display {
+    @apply font-mono text-secondary;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .amber-display {
+    @apply text-primary;
+    text-shadow: var(--glow-amber);
+  }
+
+  .btn-cockpit {
+    @apply relative px-6 py-3 font-bold uppercase tracking-wider;
+    @apply bg-gradient-to-b from-muted to-card;
+    @apply border-2 border-primary/50 rounded-md;
+    @apply text-primary transition-all duration-200;
+    @apply hover:border-primary hover:shadow-[var(--glow-amber)];
+    @apply active:scale-95;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .btn-cockpit-primary {
+    @apply btn-cockpit bg-gradient-to-b from-primary to-primary/80;
+    @apply text-primary-foreground border-primary;
+    @apply hover:from-primary/90 hover:to-primary/70;
+  }
+
+  .instrument-gauge {
+    @apply relative w-24 h-24 rounded-full;
+    @apply bg-gradient-to-br from-card to-background;
+    @apply border-4 border-border;
+    box-shadow: inset 0 2px 10px hsl(0 0% 0% / 0.5),
+                0 2px 10px hsl(0 0% 0% / 0.3);
+  }
+
+  .ai-alert {
+    @apply p-4 rounded-lg border-l-4;
+    @apply bg-card/80 backdrop-blur;
+  }
+
+  .ai-alert-info {
+    @apply ai-alert border-l-secondary text-secondary;
+  }
+
+  .ai-alert-warning {
+    @apply ai-alert border-l-warning text-warning;
+  }
+
+  .ai-alert-danger {
+    @apply ai-alert border-l-destructive text-destructive;
+  }
+
+  .ai-alert-success {
+    @apply ai-alert border-l-success text-success;
+  }
+}
+
+@layer utilities {
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
+    75% { opacity: 0.98; }
+  }
+
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+
+  .animate-flicker {
+    animation: flicker 4s ease-in-out infinite;
+  }
+
+  .animate-scan {
+    animation: scan 3s linear infinite;
+  }
+
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+}
