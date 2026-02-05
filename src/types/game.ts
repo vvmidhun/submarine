@@ -5,7 +5,7 @@ export interface DifficultySettings {
   name: string;
   timerSeconds: number;
   scenarioCount: number;
-  fuelBurnRate: number;
+  energyBurnRate: number; // Changed from fuel to energy
   penaltyMultiplier: number;
   description: string;
 }
@@ -15,107 +15,99 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultySettings> = {
     name: 'Trainee',
     timerSeconds: 40,
     scenarioCount: 3,
-    fuelBurnRate: 0.2,
+    energyBurnRate: 0.2,
     penaltyMultiplier: 0.5,
-    description: '40s decisions, 3 emergencies, forgiving scoring',
+    description: '40s decisions, 3 issues, forgiving scoring',
   },
   normal: {
-    name: 'Co-Pilot',
+    name: 'Junior Pilot',
     timerSeconds: 20,
     scenarioCount: 4,
-    fuelBurnRate: 0.3,
+    energyBurnRate: 0.3,
     penaltyMultiplier: 1,
-    description: '20s decisions, 4 emergencies, standard scoring',
+    description: '20s decisions, 4 issues, standard scoring',
   },
   hard: {
     name: 'Captain',
     timerSeconds: 10,
     scenarioCount: 5,
-    fuelBurnRate: 0.5,
+    energyBurnRate: 0.5,
     penaltyMultiplier: 1.5,
-    description: '10s decisions, 5 emergencies, strict scoring',
+    description: '10s decisions, 5 issues, strict scoring',
   },
 };
 
-// Flight route types
-export interface Airport {
+// Submarine mission types
+export interface Port {
   code: string;
   name: string;
   city: string;
   country: string;
 }
 
-export interface FlightRoute {
-  departure: Airport;
-  destination: Airport;
+export interface SubmarineRoute {
+  departure: Port;
+  destination: Port;
   distance: number; // nautical miles
   estimatedTime: number; // minutes
-  fuelRequired: number; // percentage (with reserve)
-  alternateAirport: Airport;
+  energyRequired: number; // percentage (batteries)
+  alternatePort: Port;
 }
 
-export interface WeatherCondition {
+export interface SeaCondition {
   location: string;
-  condition: 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog';
+  condition: 'clear' | 'turbulent' | 'stormy' | 'deep-sea' | 'arctic';
   visibility: 'good' | 'moderate' | 'poor';
-  windSpeed: number;
-  windDirection: string;
+  currentSpeed: number;
+  currentDirection: string;
   temperature: number;
   risk: 'low' | 'medium' | 'high';
 }
 
-export interface TrafficInfo {
+export interface ObstacleInfo {
   congestionLevel: 'low' | 'moderate' | 'high';
   delayMinutes: number;
   restrictedZones: string[];
 }
 
-export interface FlightPlanData {
-  route: FlightRoute | null;
-  weather: WeatherCondition[];
-  traffic: TrafficInfo;
-  fuelCalculated: boolean;
+export interface DivePlanData {
+  route: SubmarineRoute | null;
+  seaConditions: SeaCondition[];
+  obstacles: ObstacleInfo;
+  energyCalculated: boolean;
   safetyChecksComplete: boolean;
 }
 
 // Predefined routes
-export const AVAILABLE_ROUTES: FlightRoute[] = [
+export const AVAILABLE_ROUTES: SubmarineRoute[] = [
   {
-    departure: { code: 'LAX', name: 'Los Angeles International', city: 'Los Angeles', country: 'USA' },
-    destination: { code: 'JFK', name: 'John F. Kennedy International', city: 'New York', country: 'USA' },
-    distance: 2475,
-    estimatedTime: 310,
-    fuelRequired: 85,
-    alternateAirport: { code: 'EWR', name: 'Newark Liberty International', city: 'Newark', country: 'USA' },
+    departure: { code: 'SD', name: 'San Diego Naval Base', city: 'San Diego', country: 'USA' },
+    destination: { code: 'PH', name: 'Pearl Harbor', city: 'Honolulu', country: 'USA' },
+    distance: 2272,
+    estimatedTime: 5500,
+    energyRequired: 85,
+    alternatePort: { code: 'GU', name: 'Apra Harbor', city: 'Guam', country: 'USA' },
   },
   {
-    departure: { code: 'SFO', name: 'San Francisco International', city: 'San Francisco', country: 'USA' },
-    destination: { code: 'ORD', name: "O'Hare International", city: 'Chicago', country: 'USA' },
-    distance: 1846,
-    estimatedTime: 240,
-    fuelRequired: 70,
-    alternateAirport: { code: 'MDW', name: 'Chicago Midway', city: 'Chicago', country: 'USA' },
+    departure: { code: 'NF', name: 'Norfolk Naval Station', city: 'Norfolk', country: 'USA' },
+    destination: { code: 'PL', name: 'Plymouth Sound', city: 'Plymouth', country: 'UK' },
+    distance: 3000,
+    estimatedTime: 7200,
+    energyRequired: 95,
+    alternatePort: { code: 'BH', name: 'Belfast Harbour', city: 'Belfast', country: 'UK' },
   },
   {
-    departure: { code: 'MIA', name: 'Miami International', city: 'Miami', country: 'USA' },
-    destination: { code: 'SEA', name: 'Seattle-Tacoma International', city: 'Seattle', country: 'USA' },
-    distance: 2724,
-    estimatedTime: 350,
-    fuelRequired: 90,
-    alternateAirport: { code: 'PDX', name: 'Portland International', city: 'Portland', country: 'USA' },
-  },
-  {
-    departure: { code: 'DFW', name: 'Dallas/Fort Worth International', city: 'Dallas', country: 'USA' },
-    destination: { code: 'BOS', name: 'Logan International', city: 'Boston', country: 'USA' },
-    distance: 1551,
-    estimatedTime: 210,
-    fuelRequired: 65,
-    alternateAirport: { code: 'PVD', name: 'T.F. Green Airport', city: 'Providence', country: 'USA' },
+    departure: { code: 'PH', name: 'Pearl Harbor', city: 'Honolulu', country: 'USA' },
+    destination: { code: 'MT', name: 'Mariana Trench', city: 'Challenger Deep', country: 'International' },
+    distance: 3800,
+    estimatedTime: 9000,
+    energyRequired: 98,
+    alternatePort: { code: 'GU', name: 'Apra Harbor', city: 'Guam', country: 'USA' },
   },
 ];
 
 // Scenario timing types
-export type ScenarioTiming = 'takeoff' | 'climb' | 'cruise' | 'descent' | 'landing';
+export type ScenarioTiming = 'launch' | 'descent' | 'cruise' | 'ascent' | 'docking';
 
 export interface ScenarioConfig {
   id: string;
@@ -125,12 +117,12 @@ export interface ScenarioConfig {
 }
 
 export const SCENARIO_TIMING_CONFIG: Record<string, ScenarioConfig> = {
-  weather: { id: 'weather', validTimings: ['cruise', 'descent'], minProgress: 30, maxProgress: 80 },
-  birdstrike: { id: 'birdstrike', validTimings: ['takeoff', 'climb', 'landing'], minProgress: 5, maxProgress: 25 },
-  gear: { id: 'gear', validTimings: ['takeoff', 'landing'], minProgress: 0, maxProgress: 20 },
-  medical: { id: 'medical', validTimings: ['cruise', 'descent'], minProgress: 40, maxProgress: 85 },
-  fuel: { id: 'fuel', validTimings: ['cruise', 'descent'], minProgress: 50, maxProgress: 90 },
-  engine: { id: 'engine', validTimings: ['climb', 'cruise'], minProgress: 20, maxProgress: 70 },
-  pressurization: { id: 'pressurization', validTimings: ['climb', 'cruise'], minProgress: 25, maxProgress: 60 },
-  electrical: { id: 'electrical', validTimings: ['cruise', 'descent'], minProgress: 35, maxProgress: 75 },
+  storm: { id: 'storm', validTimings: ['cruise', 'ascent'], minProgress: 30, maxProgress: 80 },
+  hullbreach: { id: 'hullbreach', validTimings: ['descent', 'cruise', 'ascent'], minProgress: 5, maxProgress: 90 },
+  ballast: { id: 'ballast', validTimings: ['launch', 'ascent', 'docking'], minProgress: 0, maxProgress: 95 },
+  medical: { id: 'medical', validTimings: ['cruise', 'ascent'], minProgress: 40, maxProgress: 85 },
+  energy: { id: 'energy', validTimings: ['cruise', 'ascent', 'docking'], minProgress: 50, maxProgress: 95 },
+  reactor: { id: 'reactor', validTimings: ['descent', 'cruise'], minProgress: 20, maxProgress: 70 },
+  pressure: { id: 'pressure', validTimings: ['descent', 'cruise'], minProgress: 25, maxProgress: 60 },
+  electrical: { id: 'electrical', validTimings: ['cruise', 'ascent'], minProgress: 35, maxProgress: 75 },
 };

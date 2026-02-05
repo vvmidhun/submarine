@@ -2,19 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import { useSound } from '@/contexts/SoundContext';
-import { CockpitSwitch } from '@/components/game/CockpitSwitch';
-import { FlapsControl } from '@/components/game/FlapsControl';
+import { BridgeSwitch } from '@/components/game/BridgeSwitch';
+import { DivingPlanesControl } from '@/components/game/DivingPlanesControl';
 import { DigitalGauge } from '@/components/game/DigitalGauge';
-import { AltitudeIndicator } from '@/components/game/AltitudeIndicator';
+import { DepthIndicator } from '@/components/game/DepthIndicator';
 import { SpeedIndicator } from '@/components/game/SpeedIndicator';
 import { AIAssistant } from '@/components/game/AIAssistant';
-import { PreflightChecklist } from '@/components/game/PreflightChecklist';
-import { FlightManual } from '@/components/game/FlightManual';
-import { TakeoffSequence } from '@/components/game/TakeoffSequence';
-import { FlightPlanner } from '@/components/game/FlightPlanner';
-import { Plane, ArrowRight, RotateCcw, Volume2, VolumeX, MapPin } from 'lucide-react';
-import cockpitHero from '@/assets/cockpit-hero.jpg';
-import { FlightPlanData } from '@/types/game';
+import { PreDiveChecklist } from '@/components/game/PreDiveChecklist';
+import { DiveManual } from '@/components/game/DiveManual';
+import { DiveSequence } from '@/components/game/DiveSequence';
+import { DivePlanner } from '@/components/game/DivePlanner';
+import { BridgeInstruments } from '@/components/game/BridgeInstruments';
+import { Anchor, ArrowRight, RotateCcw, Volume2, VolumeX, MapPin, Waves, Shield, Bot } from 'lucide-react';
+import submarineHero from '@/assets/cockpit-hero.jpg';
+import { DivePlanData } from '@/types/game';
 
 interface AIMessage {
   id: string;
@@ -23,141 +24,199 @@ interface AIMessage {
   timestamp: Date;
 }
 
-type Level1Phase = 'planning' | 'preflight' | 'takeoff';
+type Level1Phase = 'intro-animation' | 'planning' | 'predive' | 'dive';
 
 export default function Level1Page() {
   const navigate = useNavigate();
-  const { gameState, toggleSwitch, setFlaps, completePreFlight, completeFlightPlan, setLevel, resetGame } = useGame();
+  const { gameState, toggleSwitch, setDivingPlanes, completePreDive, completeDivePlan, setLevel, resetGame } = useGame();
   const { soundEnabled, toggleSound, playStartupSound, startEngineSound, stopEngineSound, playSuccessSound } = useSound();
-  const { cockpitState, flightData, flightPlanComplete } = gameState;
-  
-  const [phase, setPhase] = useState<Level1Phase>(flightPlanComplete ? 'preflight' : 'planning');
-  const [aiMessages, setAiMessages] = useState<AIMessage[]>([
-    {
-      id: '1',
-      type: 'info',
-      message: 'Welcome, Co-Pilot. Begin pre-flight checks. I\'ll monitor systems and provide guidance.',
-      timestamp: new Date(),
-    },
-  ]);
+  const { bridgeState, diveData, divePlanComplete } = gameState;
 
-  // Start engine sound when APU is turned on
+  const [phase, setPhase] = useState<Level1Phase>('intro-animation');
+  const [controlsActivated, setControlsActivated] = useState(false);
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
+
+  // Start Intro Animation then switch to planning/predive
   useEffect(() => {
-    if (cockpitState.apu && cockpitState.battery) {
+    if (phase === 'intro-animation') {
+      const timer = setTimeout(() => {
+        setPhase(divePlanComplete ? 'predive' : 'planning');
+        setAiMessages([
+          {
+            id: 'init',
+            type: 'info',
+            message: 'Bridge systems initialising. Welcome Captain. Systems will activate shortly.',
+            timestamp: new Date(),
+          },
+        ]);
+
+        // Activate controls after a short delay
+        setTimeout(() => {
+          setControlsActivated(true);
+          playStartupSound();
+          setAiMessages(prev => [...prev, {
+            id: 'active',
+            type: 'success',
+            message: 'Bridge controls ONLINE. Begin system readiness checks.',
+            timestamp: new Date(),
+          }]);
+        }, 1500);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, divePlanComplete, playStartupSound]);
+
+  // Start engine/reactor sound when APU/Reactor is turned on
+  useEffect(() => {
+    if (bridgeState.apu && bridgeState.battery) {
       startEngineSound();
     } else {
       stopEngineSound();
     }
-  }, [cockpitState.apu, cockpitState.battery, startEngineSound, stopEngineSound]);
+  }, [bridgeState.apu, bridgeState.battery, startEngineSound, stopEngineSound]);
 
   // Check for completed steps and add AI messages
   useEffect(() => {
     const messages: AIMessage[] = [...aiMessages];
-    
-    if (cockpitState.battery && !aiMessages.some(m => m.id === 'battery')) {
+
+    if (bridgeState.battery && !aiMessages.some(m => m.id === 'battery')) {
       messages.push({
         id: 'battery',
         type: 'success',
-        message: 'Battery power confirmed. Electrical systems online.',
-        timestamp: new Date(),
-      });
-    }
-    
-    if (cockpitState.avionics && !aiMessages.some(m => m.id === 'avionics')) {
-      messages.push({
-        id: 'avionics',
-        type: 'success',
-        message: 'Avionics master active. Navigation and communication systems ready.',
-        timestamp: new Date(),
-      });
-    }
-    
-    if (cockpitState.fuelPumps && !aiMessages.some(m => m.id === 'fuel')) {
-      messages.push({
-        id: 'fuel',
-        type: 'info',
-        message: 'Fuel pumps running. Fuel quantity: 100%. Ready for departure.',
+        message: 'Battery arrays online. Main power stable.',
         timestamp: new Date(),
       });
     }
 
-    if (!cockpitState.seatbeltSign && cockpitState.battery && !aiMessages.some(m => m.id === 'seatbelt-warn')) {
+    if (bridgeState.sonar && !aiMessages.some(m => m.id === 'sonar')) {
       messages.push({
-        id: 'seatbelt-warn',
-        type: 'warning',
-        message: 'Don\'t forget to activate the seatbelt sign before takeoff.',
+        id: 'sonar',
+        type: 'success',
+        message: 'Sonar pulse active. Deep sea mapping initiated.',
         timestamp: new Date(),
       });
     }
-    
+
+    if (bridgeState.fuelPumps && !aiMessages.some(m => m.id === 'energy')) {
+      messages.push({
+        id: 'energy',
+        type: 'info',
+        message: 'Energy converters running at 100% capacity.',
+        timestamp: new Date(),
+      });
+    }
+
+    if (!bridgeState.seatbeltSign && bridgeState.battery && !aiMessages.some(m => m.id === 'depth-warn')) {
+      messages.push({
+        id: 'depth-warn',
+        type: 'warning',
+        message: 'Safety Protocol: Activate the Depth Warning sign before diving.',
+        timestamp: new Date(),
+      });
+    }
+
     if (messages.length !== aiMessages.length) {
       setAiMessages(messages.slice(-5)); // Keep last 5 messages
     }
-  }, [cockpitState]);
+  }, [bridgeState]);
 
-  // Check if preflight is complete
-  const preflightComplete = 
-    cockpitState.battery &&
-    cockpitState.apu &&
-    cockpitState.avionics &&
-    cockpitState.fuelPumps &&
-    cockpitState.navigationLights &&
-    cockpitState.seatbeltSign &&
-    cockpitState.flaps >= 10 &&
-    !cockpitState.parkingBrake;
+  // Check if pre-dive is complete
+  const preDiveComplete =
+    bridgeState.battery &&
+    bridgeState.apu &&
+    bridgeState.sonar &&
+    bridgeState.fuelPumps &&
+    bridgeState.navigationLights &&
+    bridgeState.seatbeltSign &&
+    bridgeState.flaps >= 10 &&
+    !bridgeState.parkingBrake;
 
-  const handleFlightPlanComplete = (plan: FlightPlanData) => {
+  const handleDivePlanComplete = (plan: DivePlanData) => {
     playSuccessSound();
-    completeFlightPlan(plan);
-    setPhase('preflight');
+    completeDivePlan(plan);
+    setPhase('predive');
   };
 
   const handleProceed = () => {
-    if (preflightComplete) {
+    if (preDiveComplete) {
       playSuccessSound();
       playStartupSound();
-      completePreFlight();
-      setPhase('takeoff');
+      completePreDive();
+      setPhase('dive');
     }
   };
 
-  const handleTakeoffComplete = () => {
+  const handleDiveComplete = () => {
     setLevel('level2');
     navigate('/level2');
   };
 
-  // Show takeoff sequence
-  if (phase === 'takeoff') {
-    return <TakeoffSequence onComplete={handleTakeoffComplete} />;
+  // Show Intro Animation
+  if (phase === 'intro-animation') {
+    return (
+      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center p-8 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-40 scale-110 animate-pulse transition-all duration-3000"
+          style={{ backgroundImage: `url(${submarineHero})` }}
+        />
+        <div className="absolute inset-0 bg-cyan-950/40" />
+
+        <div className="relative z-10 text-center space-y-8 max-w-lg">
+          <div className="w-24 h-24 mx-auto rounded-full bg-cyan-500/20 flex items-center justify-center animate-bounce shadow-[0_0_50px_rgba(34,211,238,0.3)]">
+            <Anchor className="w-12 h-12 text-cyan-400" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-4xl font-display font-bold text-cyan-400 tracking-tighter">SUB-X1 ALPHA</h2>
+            <p className="text-cyan-300/60 uppercase tracking-[0.3em] text-xs">Arriving at Launch Zone</p>
+          </div>
+          <div className="w-full h-1 bg-cyan-900 rounded-full overflow-hidden">
+            <div className="h-full bg-cyan-400 animate-[progress_3s_ease-in-out_infinite]" />
+          </div>
+          <p className="text-xs text-cyan-500 font-mono animate-pulse uppercase">Initialising bridge protocols...</p>
+        </div>
+
+        <style>{`
+          @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
+      </div>
+    );
   }
 
-  // Show flight planner
+  // Show dive sequence
+  if (phase === 'dive') {
+    return <DiveSequence onComplete={handleDiveComplete} />;
+  }
+
+  // Show dive planner
   if (phase === 'planning') {
     return (
       <div className="min-h-screen bg-background relative">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url(${cockpitHero})` }}
+          style={{ backgroundImage: `url(${submarineHero})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/90 to-background" />
 
         <div className="relative z-10 container mx-auto px-4 py-6">
           <header className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-secondary-foreground" />
+              <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="font-display text-xl text-secondary">LEVEL 1: FLIGHT PLANNING</h1>
-                <p className="text-xs text-muted-foreground">Plan your route, check weather, and verify safety</p>
+                <h1 className="font-display text-xl text-cyan-400">MISSION PLANNING</h1>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">Plot your course through the deep</p>
               </div>
             </div>
-            
-            <FlightManual />
+
+            <DiveManual />
           </header>
 
           <div className="max-w-2xl mx-auto">
-            <FlightPlanner onPlanComplete={handleFlightPlanComplete} />
+            <DivePlanner onPlanComplete={handleDivePlanComplete} />
           </div>
         </div>
       </div>
@@ -169,218 +228,133 @@ export default function Level1Page() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Cockpit background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{ backgroundImage: `url(${cockpitHero})` }}
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Bridge background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20 scale-105"
+        style={{ backgroundImage: `url(${submarineHero})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/90 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/90 to-zinc-950" />
 
-      <div className="relative z-10 container mx-auto px-4 py-6">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <Plane className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-display text-xl text-primary">LEVEL 1: PRE-FLIGHT</h1>
-              <p className="text-xs text-muted-foreground">Complete all systems checks before takeoff</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={toggleSound} 
-              className="btn-cockpit flex items-center gap-2 text-sm"
-              title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-            <FlightManual />
-            <button onClick={handleReset} className="btn-cockpit flex items-center gap-2 text-sm">
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-        </header>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1)_0%,rgba(0,0,0,0.8)_100%)] pointer-events-none" />
 
-        {/* Main cockpit grid */}
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Left sidebar - AI Assistant */}
-          <div className="lg:col-span-1 space-y-4">
+      {/* Sonar Sweep Overlay */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+        <div className="w-full h-full animate-[spin_10s_linear_infinite] origin-center bg-[conic-gradient(from_0deg,transparent_0deg,transparent_340deg,rgba(6,182,212,0.3)_360deg)]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto grid gap-6 grid-cols-1 md:grid-cols-12 h-full">
+        {/* Left Panel - Systems */}
+        <div className="md:col-span-3 space-y-6">
+          <div className="marine-panel p-6 animate-fade-in-up">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.4)]">
+                <Anchor className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-display text-xl text-cyan-400">BRIDGE PROTOCOL</h1>
+                <p className="text-[10px] text-cyan-300/60 uppercase tracking-widest">Complete all systems checks before diving</p>
+              </div>
+            </div>
+
             <AIAssistant messages={aiMessages} />
-            <PreflightChecklist cockpitState={cockpitState} />
           </div>
 
-          {/* Center - Main cockpit controls */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Primary flight displays */}
-            <div className="cockpit-panel p-6">
-              <h3 className="font-display text-sm text-primary uppercase tracking-wider mb-4 text-center">
-                Primary Flight Display
-              </h3>
-              
-              <div className="flex items-center justify-center gap-8 flex-wrap">
-                <div className="text-center">
-                  <AltitudeIndicator altitude={flightData.altitude} />
-                  <p className="text-xs text-muted-foreground mt-8">ALTITUDE</p>
-                </div>
-                <div className="text-center">
-                  <SpeedIndicator speed={flightData.speed} />
-                  <p className="text-xs text-muted-foreground mt-8">AIRSPEED</p>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <DigitalGauge label="Heading" value={flightData.heading} unit="°" />
-                  <DigitalGauge label="Fuel" value={`${flightData.fuel}%`} status={flightData.fuel < 20 ? 'warning' : 'normal'} />
-                </div>
-              </div>
-            </div>
-
-            {/* Main switch panel */}
-            <div className="cockpit-panel p-6">
-              <h3 className="font-display text-sm text-primary uppercase tracking-wider mb-4 text-center">
-                Overhead Panel
-              </h3>
-              
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-4 justify-items-center">
-                <CockpitSwitch
-                  label="Battery"
-                  isOn={cockpitState.battery}
-                  onToggle={() => toggleSwitch('battery')}
-                />
-                <CockpitSwitch
-                  label="APU"
-                  isOn={cockpitState.apu}
-                  onToggle={() => toggleSwitch('apu')}
-                />
-                <CockpitSwitch
-                  label="Avionics"
-                  isOn={cockpitState.avionics}
-                  onToggle={() => toggleSwitch('avionics')}
-                />
-                <CockpitSwitch
-                  label="Fuel Pumps"
-                  isOn={cockpitState.fuelPumps}
-                  onToggle={() => toggleSwitch('fuelPumps')}
-                />
-                <CockpitSwitch
-                  label="Nav Lights"
-                  isOn={cockpitState.navigationLights}
-                  onToggle={() => toggleSwitch('navigationLights')}
-                />
-                <CockpitSwitch
-                  label="Anti-Ice"
-                  isOn={cockpitState.antiIce}
-                  onToggle={() => toggleSwitch('antiIce')}
-                />
-              </div>
-            </div>
-
-            {/* Secondary controls */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="cockpit-panel p-4 flex flex-col items-center">
-                <CockpitSwitch
-                  label="Seatbelt"
-                  isOn={cockpitState.seatbeltSign}
-                  onToggle={() => toggleSwitch('seatbeltSign')}
-                  variant="warning"
-                />
-              </div>
-              
-              <div className="cockpit-panel p-4 flex flex-col items-center">
-                <CockpitSwitch
-                  label="Autopilot"
-                  isOn={cockpitState.autopilot}
-                  onToggle={() => toggleSwitch('autopilot')}
-                />
-              </div>
-              
-              <div className="cockpit-panel p-4 flex flex-col items-center">
-                <CockpitSwitch
-                  label="Parking Brake"
-                  isOn={cockpitState.parkingBrake}
-                  onToggle={() => toggleSwitch('parkingBrake')}
-                  variant={cockpitState.parkingBrake ? 'danger' : 'default'}
-                />
-              </div>
-              
-              <FlapsControl
-                value={cockpitState.flaps}
-                onChange={setFlaps}
-              />
-            </div>
+          <div className="marine-panel p-6 animate-fade-in-up delay-100">
+            <PreDiveChecklist bridgeState={bridgeState} onToggle={toggleSwitch} />
           </div>
 
-          {/* Right sidebar - Status & proceed */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Weather & Status */}
-            <div className="cockpit-panel p-4">
-              <h3 className="font-display text-xs text-primary uppercase tracking-wider mb-3">
-                Weather Status
-              </h3>
-              <div className="cockpit-screen p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-muted-foreground">Conditions:</span>
-                  <span className="text-sm digital-display capitalize">{flightData.weather}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Risk Level:</span>
-                  <span className={`text-sm font-mono px-2 py-0.5 rounded ${
-                    flightData.riskLevel === 'green' ? 'bg-success/20 text-success' :
-                    flightData.riskLevel === 'yellow' ? 'bg-warning/20 text-warning' :
+          <div className="bridge-panel border-cyan-500/30 p-4 flex flex-col items-center justify-center bg-cyan-950/10">
+            <BridgeSwitch
+              label="Auto-Pilot"
+              isOn={bridgeState.autopilot}
+              onToggle={() => toggleSwitch('autopilot')}
+              disabled={!controlsActivated}
+            />
+          </div>
+
+          <div className="bridge-panel border-cyan-500/30 p-4 flex flex-col items-center justify-center bg-cyan-950/10">
+            <BridgeSwitch
+              label="Anchor"
+              isOn={bridgeState.parkingBrake}
+              onToggle={() => toggleSwitch('parkingBrake')}
+              variant={bridgeState.parkingBrake ? 'danger' : 'default'}
+              disabled={!controlsActivated}
+            />
+          </div>
+
+          <DivingPlanesControl
+            value={bridgeState.flaps}
+            onChange={setDivingPlanes}
+            disabled={!controlsActivated}
+          />
+        </div>
+
+
+        {/* Right sidebar - Instruments & Status */}
+        <div className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto pr-1 custom-scrollbar">
+          <BridgeInstruments diveData={diveData} />
+
+          {/* Environment Status */}
+          <div className="bridge-panel border-cyan-500/30 p-4 bg-cyan-950/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Waves className="w-3 h-3 text-cyan-400" />
+              <h3 className="font-display text-[10px] text-cyan-400 uppercase tracking-[0.2em]">Environment</h3>
+            </div>
+            <div className="bridge-screen border-cyan-500/20 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-cyan-600 uppercase">Conditions:</span>
+                <span className="text-xs text-cyan-300 digital-display capitalize">{diveData.seaCondition}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-cyan-600 uppercase">Risk Level:</span>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${diveData.riskLevel === 'green' ? 'bg-success/20 text-success' :
+                  diveData.riskLevel === 'yellow' ? 'bg-warning/20 text-warning' :
                     'bg-destructive/20 text-destructive'
                   }`}>
-                    {flightData.riskLevel.toUpperCase()}
-                  </span>
-                </div>
+                  {diveData.riskLevel.toUpperCase()}
+                </span>
               </div>
             </div>
-
-            {/* Flight Info */}
-            <div className="cockpit-panel p-4">
-              <h3 className="font-display text-xs text-primary uppercase tracking-wider mb-3">
-                Flight Information
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Flight:</span>
-                  <span className="digital-display">AX-204</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cruise Alt:</span>
-                  <span className="digital-display">FL350</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Route:</span>
-                  <span className="digital-display">LAX → JFK</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Proceed button */}
-            <button
-              onClick={handleProceed}
-              disabled={!preflightComplete}
-              className={`w-full p-4 rounded-lg font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                preflightComplete
-                  ? 'btn-cockpit-primary'
-                  : 'bg-muted text-muted-foreground cursor-not-allowed'
-              }`}
-            >
-              {preflightComplete ? (
-                <>
-                  Ready for Takeoff
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              ) : (
-                'Complete Checklist'
-              )}
-            </button>
           </div>
+
+          {/* Mission Button */}
+          <button
+            onClick={handleProceed}
+            disabled={!preDiveComplete || !controlsActivated}
+            className={`w-full p-6 rounded-lg font-display uppercase tracking-[0.2em] flex flex-col items-center justify-center gap-2 transition-all border-2 ${preDiveComplete && controlsActivated
+              ? 'bg-cyan-600/20 border-cyan-500 text-cyan-400 hover:bg-cyan-600/40 shadow-[0_0_20px_rgba(34,211,238,0.2)]'
+              : 'bg-zinc-900/50 border-zinc-800 text-zinc-600 cursor-not-allowed opacity-50'
+              }`}
+          >
+            {preDiveComplete ? (
+              <>
+                <Waves className="w-6 h-6 animate-bounce" />
+                <span className="text-sm">Initiate Dive</span>
+              </>
+            ) : (
+              <>
+                <Shield className="w-6 h-6 opacity-30" />
+                <span className="text-xs">Systems Checking</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
-    </div>
+
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(8, 145, 178, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(8, 145, 178, 0.2);
+          border-radius: 2px;
+        }
+      `}</style>
+    </div >
   );
 }

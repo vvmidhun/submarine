@@ -43,7 +43,7 @@ export function DecisionTimer({ seconds, onTimeout, isPaused = false, className 
   const isCritical = percentage <= 25;
 
   return (
-    <div className={cn('cockpit-panel p-3', className)}>
+    <div className={cn('bridge-panel p-3', className)}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {isCritical ? (

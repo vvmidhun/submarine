@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { useCockpitSounds } from '@/hooks/useCockpitSounds';
+import { useBridgeSounds } from '@/hooks/useBridgeSounds';
 
 interface SoundContextType {
   soundEnabled: boolean;
@@ -17,7 +17,7 @@ const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
 export function SoundProvider({ children }: { children: ReactNode }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const sounds = useCockpitSounds();
+  const sounds = useBridgeSounds();
 
   const toggleSound = () => setSoundEnabled((prev) => !prev);
 

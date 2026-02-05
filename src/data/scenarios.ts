@@ -7,7 +7,7 @@ export interface ScenarioData {
   description: string;
   iconType: 'weather' | 'shield' | 'alert' | 'users' | 'fuel' | 'zap' | 'thermometer';
   urgency: 'low' | 'medium' | 'high';
-  // Valid flight phases for this scenario
+  // Valid dive phases for this scenario
   validPhases: ScenarioTiming[];
   // Optional: ID of parent scenario (for escalation chains)
   parentScenarioId?: string;
@@ -25,157 +25,157 @@ export interface ScenarioData {
 // Base scenarios - always available
 export const BASE_SCENARIOS: ScenarioData[] = [
   {
-    id: 'weather',
-    title: 'Severe Weather Ahead',
-    description: 'Radar shows a major thunderstorm cell directly on your flight path. Turbulence and lightning detected.',
+    id: 'storm',
+    title: 'Severe Sea Storm',
+    description: 'Surface sensors detect a massive cyclone above. Sea conditions are becoming extremely turbulent.',
     iconType: 'weather',
     urgency: 'high',
-    validPhases: ['cruise', 'descent'],
+    validPhases: ['cruise', 'ascent'],
     choices: [
       {
-        id: 'reroute',
-        label: 'Reroute Around Storm',
-        description: 'Request deviation from ATC. Additional 30 minutes flight time.',
+        id: 'dive-deeper',
+        label: 'Dive Deeper',
+        description: 'Go to 500m to escape the surface turbulence.',
         isCorrect: true,
-        consequence: 'Good decision! Safety over schedule. Passengers experience smooth flight.',
+        consequence: 'Great decision! The deep water remains calm while the storm rages above.',
       },
       {
-        id: 'through',
-        label: 'Fly Through Storm',
-        description: 'Maintain current heading to stay on schedule.',
+        id: 'surface',
+        label: 'Stay at Surface',
+        description: 'Maintain current depth to conserve energy.',
         isCorrect: false,
-        consequence: 'Dangerous! Severe turbulence injured passengers. Aircraft sustained damage.',
+        consequence: 'Dangerous! Violent waves have battered the hull, causing minor leaks.',
       },
       {
-        id: 'ignore',
-        label: 'Ignore Alert',
-        description: 'Weather systems sometimes give false alarms.',
+        id: 'ignore-storm',
+        label: 'Ignore Warning',
+        description: 'Storms rarely affect deep-sea vessels.',
         isCorrect: false,
-        consequence: 'Critical error! Never ignore weather warnings. Multiple injuries reported.',
+        consequence: 'Critical error! The extreme surface pressure changes have stressed the hull.',
       },
     ],
   },
   {
-    id: 'birdstrike',
-    title: 'Bird Strike Detected',
-    description: 'Impact on engine #1 during climb. Slight vibration detected. Engine parameters fluctuating.',
+    id: 'hullbreach',
+    title: 'Minor Hull Breach',
+    description: 'A small fracture detected in the lower observation deck. High-pressure water is spraying!',
     iconType: 'shield',
     urgency: 'high',
-    validPhases: ['takeoff', 'climb', 'landing'],
+    validPhases: ['descent', 'cruise', 'ascent'],
     choices: [
       {
-        id: 'assess',
-        label: 'Reduce Thrust & Assess',
-        description: 'Lower engine power, monitor instruments, evaluate damage.',
+        id: 'seal-deck',
+        label: 'Seal Observation Deck',
+        description: 'Isolate the compartment immediately.',
         isCorrect: true,
-        consequence: 'Excellent! Careful assessment shows minor damage. Safe to continue to destination.',
+        consequence: 'Excellent! The breach is contained in a single compartment. Vessel remains safe.',
       },
       {
-        id: 'return',
-        label: 'Emergency Return',
-        description: 'Declare emergency and return to departure airport immediately.',
+        id: 'patch-hull',
+        label: 'Deploy Emergency Patch',
+        description: 'Send repair drone to apply magnetic hull patch.',
         isCorrect: true,
-        consequence: 'Safe choice. Emergency return successful. Precautionary but appropriate.',
+        consequence: 'Success! The automated patch held against the pressure. Leak stopped.',
       },
       {
-        id: 'continue',
-        label: 'Continue Normal Flight',
-        description: 'Birds hits happen often. Engines are designed to handle it.',
+        id: 'ignore-leak',
+        label: 'Wait and Monitor',
+        description: 'The internal pumps should handle small amounts of water.',
         isCorrect: false,
-        consequence: 'Risky! Engine failure occurred 20 minutes later. Emergency landing required.',
+        consequence: 'Risky! Pressure widened the crack. The deck is now flooding rapidly.',
       },
     ],
   },
   {
-    id: 'gear',
-    title: 'Landing Gear Malfunction',
-    description: 'Main landing gear not indicating down and locked. Warning light illuminated.',
+    id: 'ballast',
+    title: 'Ballast Tank Malfunction',
+    description: 'Rear ballast tank valves are jammed. Submarine is tilting 15 degrees downward.',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['takeoff', 'landing'],
+    validPhases: ['launch', 'ascent', 'docking'],
     choices: [
       {
-        id: 'manual',
-        label: 'Manual Gear Extension',
-        description: 'Use backup system to manually lower landing gear.',
+        id: 'manual-purge',
+        label: 'Manual Air Purge',
+        description: 'Use backup high-pressure air to force water out of tanks.',
         isCorrect: true,
-        consequence: 'Textbook response! Manual extension successful. Gear locked down.',
+        consequence: 'Textbook response! Forced purge cleared the obstruction. Balance restored.',
       },
       {
-        id: 'checklist',
-        label: 'Run Emergency Checklist',
-        description: 'Follow standard emergency procedures step by step.',
+        id: 'shift-trim',
+        label: 'Adjust Trim Weights',
+        description: 'Shift internal weights to compensate for the tilt.',
         isCorrect: true,
-        consequence: 'Proper procedure! Checklist identified the issue. Gear extended normally.',
+        consequence: 'Smart thinking! The counter-balance stabilized the vessel for now.',
       },
       {
-        id: 'bellyland',
-        label: 'Prepare for Belly Landing',
-        description: 'Assume gear is stuck. Prepare for gear-up landing.',
+        id: 'over-throttle',
+        label: 'Max Throttle Up',
+        description: 'Use engine power to force the submarine to level out.',
         isCorrect: false,
-        consequence: 'Premature! You skipped troubleshooting steps. Gear was actually functional.',
+        consequence: 'Premature! You burned too much energy and the tilt eventually got worse.',
       },
     ],
   },
   {
-    id: 'medical',
-    title: 'Passenger Medical Emergency',
-    description: 'Flight attendant reports passenger showing signs of heart attack. Passenger is unresponsive.',
+    id: 'medical-crew',
+    title: 'Crew Member Illness',
+    description: 'A technical specialist is showing signs of severe decompression sickness.',
     iconType: 'users',
     urgency: 'high',
-    validPhases: ['cruise', 'descent'],
+    validPhases: ['cruise', 'ascent'],
     choices: [
       {
-        id: 'divert',
-        label: 'Divert to Nearest Airport',
-        description: 'Change course immediately. Medical facilities 15 minutes away.',
+        id: 'hyperbaric',
+        label: 'Use Hyperbaric Chamber',
+        description: 'Place crew member in the onboard pressure chamber.',
         isCorrect: true,
-        consequence: 'Life-saving decision! Patient received treatment in time. Full recovery expected.',
+        consequence: 'Life-saving! The technician is stable. They will recover fully.',
       },
       {
-        id: 'medical-assist',
-        label: 'Request Medical Assistance',
-        description: 'Contact medical professionals via radio. Use onboard medical kit.',
+        id: 'med-bay',
+        label: 'Administer Oxygen',
+        description: 'Provide high-flow oxygen and monitor vital signs.',
         isCorrect: true,
-        consequence: 'Good call! Doctor on board provided assistance. Patient stabilized for landing.',
+        consequence: 'Good call! Stabilization successful until we reach the base.',
       },
       {
-        id: 'continue-medical',
-        label: 'Continue to Destination',
-        description: 'Only 45 minutes remaining. Medical team will be waiting.',
+        id: 'push-through',
+        label: 'Continue Mission',
+        description: 'Only short time remains. They can wait until docking.',
         isCorrect: false,
-        consequence: 'Tragic outcome. Patient did not survive. Time was critical.',
+        consequence: 'Sad outcome. The lack of immediate treatment caused permanent injury.',
       },
     ],
   },
   {
-    id: 'fuel',
-    title: 'Low Fuel Warning',
-    description: 'Holding pattern extended due to airport congestion. Fuel reserves below minimum.',
+    id: 'energy-crisis',
+    title: 'Low Energy Reserves',
+    description: 'Main reactor efficiency is dropping. Energy levels are below safety margins.',
     iconType: 'fuel',
     urgency: 'medium',
-    validPhases: ['cruise', 'descent', 'landing'],
+    validPhases: ['cruise', 'ascent', 'docking'],
     choices: [
       {
-        id: 'alternate',
-        label: 'Divert to Alternate Airport',
-        description: 'Proceed to backup airport with less traffic.',
+        id: 'conserve',
+        label: 'Shed Non-Essential Power',
+        description: 'Turn off research equipment and dim lights.',
         isCorrect: true,
-        consequence: 'Smart decision! Safe landing with adequate fuel reserve at alternate.',
+        consequence: 'Smart decision! Power consumption dropped enough to reach the base.',
       },
       {
-        id: 'priority',
-        label: 'Declare Fuel Emergency',
-        description: 'Request priority landing clearance from ATC.',
+        id: 'solar-buoy',
+        label: 'Deploy Solar Buoy',
+        description: 'Send tethered buoy to surface to recharge via sunlight.',
         isCorrect: true,
-        consequence: 'Correct action! Priority granted. Landed safely with minimal fuel remaining.',
+        consequence: 'Clever! The buoy provides just enough trickle charge to keep systems online.',
       },
       {
-        id: 'wait',
-        label: 'Continue Holding',
-        description: 'Wait for original landing slot. Fuel might be enough.',
+        id: 'full-ahead',
+        label: 'Maintain Full Speed',
+        description: 'Try to reach docking before the energy runs out.',
         isCorrect: false,
-        consequence: 'Dangerous gamble! Engines flamed out on approach. Emergency landing in field.',
+        consequence: 'Dangerous gamble! Reactor shut down 1km from dock. Sub is drifting.',
       },
     ],
   },
@@ -184,250 +184,250 @@ export const BASE_SCENARIOS: ScenarioData[] = [
 // Extended scenarios - for variety on subsequent playthroughs
 export const EXTENDED_SCENARIOS: ScenarioData[] = [
   {
-    id: 'engine',
-    title: 'Engine Fire Warning',
-    description: 'Fire warning light for engine #2. No visible smoke from cockpit. Engine temperature rising.',
+    id: 'reactor-fault',
+    title: 'Reactor Cooling Fault',
+    description: 'Core temperature is rising. Primary cooling pump has stopped responding.',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['climb', 'cruise'],
+    validPhases: ['descent', 'cruise'],
     choices: [
       {
-        id: 'shutdown',
-        label: 'Execute Engine Shutdown',
-        description: 'Follow fire checklist: throttle idle, fuel cutoff, fire extinguisher.',
+        id: 'backup-pump',
+        label: 'Activate Backup Coolant',
+        description: 'Engage secondary liquid-nitrogen cooling circuit.',
         isCorrect: true,
-        consequence: 'Perfect execution! Fire contained. Single-engine operation stable.',
+        consequence: 'Perfect execution! Core temperature stabilized instantly.',
       },
       {
-        id: 'verify',
-        label: 'Verify Fire Indication',
-        description: 'Check secondary indicators before acting. Could be false alarm.',
+        id: 'scram',
+        label: 'Emergency Scram',
+        description: 'Insert control rods to stop the reactor completely.',
         isCorrect: true,
-        consequence: 'Thorough check! Fire confirmed. Immediate shutdown prevented spread.',
+        consequence: 'Safe move! Reactor safely shut down. Battery power engaged.',
       },
       {
-        id: 'ignore-fire',
+        id: 'monitor-temp',
         label: 'Monitor and Continue',
-        description: 'Light might be faulty. Keep flying and observe.',
+        description: 'Temperature sensors sometimes drift. Check again in 5 mins.',
         isCorrect: false,
-        consequence: 'Catastrophic error! Fire spread to wing. Forced emergency landing.',
+        consequence: 'Catastrophic error! Core reached critical heat. Emergency venting required.',
       },
     ],
   },
   {
-    id: 'pressurization',
-    title: 'Cabin Pressurization Failure',
-    description: 'Rapid decompression warning. Cabin altitude climbing rapidly. Oxygen masks deployed.',
+    id: 'hull-pressure',
+    title: 'Critical Hull Compression',
+    description: 'Submarine has drifted below its rated depth. Hull groaning under extreme pressure.',
     iconType: 'zap',
     urgency: 'high',
-    validPhases: ['climb', 'cruise'],
+    validPhases: ['descent', 'cruise'],
     choices: [
       {
-        id: 'descend',
-        label: 'Emergency Descent',
-        description: 'Immediately descend to 10,000 feet. Don oxygen mask.',
+        id: 'ascent-blow',
+        label: 'Blow Emergency Ballast',
+        description: 'Immediately release all air from tanks to rise rapidly.',
         isCorrect: true,
-        consequence: 'Textbook response! Reached safe altitude before hypoxia set in.',
+        consequence: 'Textbook response! Submarine ascended to safe depth before hull failure.',
       },
       {
-        id: 'slow-descent',
-        label: 'Gradual Descent',
-        description: 'Begin controlled descent while assessing the situation.',
+        id: 'slow-rise',
+        label: 'Controlled Ascent',
+        description: 'Begin gradual rise while assessing hull stress.',
         isCorrect: false,
-        consequence: 'Too slow! Several passengers lost consciousness before reaching safe altitude.',
+        consequence: 'Too slow! A viewport cracked from the pressure before reaching safe depth.',
       },
       {
-        id: 'maintain',
-        label: 'Maintain Altitude',
-        description: 'Backup systems should compensate. Continue flight.',
+        id: 'hold-depth',
+        label: 'Hold Current Depth',
+        description: 'The hull is designed with a 20% safety margin. It will hold.',
         isCorrect: false,
-        consequence: 'Critical failure! Time of useful consciousness exceeded. Crew incapacitated.',
+        consequence: 'Critical failure! Hull exceeded limits. Major structural damage occurred.',
       },
     ],
   },
   {
-    id: 'electrical',
-    title: 'Electrical System Failure',
-    description: 'Main bus failure detected. Partial power loss. Some instruments offline.',
+    id: 'electrical-short',
+    title: 'Electrical Short Circuit',
+    description: 'Sparks detected in the navigation console. Smoke filling the bridge.',
     iconType: 'zap',
     urgency: 'medium',
-    validPhases: ['cruise', 'descent'],
+    validPhases: ['cruise', 'ascent'],
     choices: [
       {
-        id: 'backup',
-        label: 'Switch to Backup Power',
-        description: 'Activate standby electrical system. Shed non-essential loads.',
+        id: 'extinguish-co2',
+        label: 'Use CO2 Extinguisher',
+        description: 'Directly put out fire and clear smoke with vents.',
         isCorrect: true,
-        consequence: 'Excellent troubleshooting! Backup systems providing adequate power.',
+        consequence: 'Excellent troubleshooting! Fire extinguished. Nav systems restored on backup.',
       },
       {
-        id: 'reset',
-        label: 'Reset Circuit Breakers',
-        description: 'Attempt to restore power by resetting tripped breakers.',
+        id: 'isolate-bus',
+        label: 'Isolate Electrical Bus',
+        description: 'Cut power to the entire affected section.',
         isCorrect: true,
-        consequence: 'Problem identified! Faulty circuit isolated. Main bus restored.',
+        consequence: 'Problem identified! Short isolated. Fire died out without spreading.',
       },
       {
-        id: 'continue-elec',
-        label: 'Continue with Partial Power',
-        description: 'Remaining systems sufficient for flight.',
+        id: 'fan-smoke',
+        label: 'Clear Smoke First',
+        description: 'Improve visibility before trying to find the source.',
         isCorrect: false,
-        consequence: 'Risky! Total power failure occurred 10 minutes later. Lost navigation.',
+        consequence: 'Risky! Fanning the smoke provided oxygen to the electrical fire. It grew larger.',
       },
     ],
   },
   {
-    id: 'icing',
-    title: 'Severe Icing Conditions',
-    description: 'Ice accumulating rapidly on wings and engines. Anti-ice systems at maximum.',
+    id: 'currents',
+    title: 'Strong Ocean Currents',
+    description: 'A powerful deep-sea current is pushing the sub off course and into a rocky trench.',
     iconType: 'thermometer',
     urgency: 'high',
-    validPhases: ['climb', 'cruise', 'descent'],
+    validPhases: ['descent', 'cruise', 'ascent'],
     choices: [
       {
-        id: 'exit-ice',
-        label: 'Exit Icing Conditions',
-        description: 'Change altitude immediately to find warmer air.',
+        id: 'vector-thrust',
+        label: 'Vector Thruster Correction',
+        description: 'Angle side thrusters to combat the sideways drift.',
         isCorrect: true,
-        consequence: 'Smart decision! Found warmer altitude. Ice began to shed.',
+        consequence: 'Smart decision! The sub stayed centered in the safe channel.',
       },
       {
-        id: 'divert-ice',
-        label: 'Divert to Nearest Airport',
-        description: 'Anti-ice system may not keep up. Land before situation worsens.',
+        id: 'ascend-current',
+        label: 'Ascend to Calmer Water',
+        description: 'Rise 100m to find a layer with less current.',
         isCorrect: true,
-        consequence: 'Safe choice! Landed with moderate ice buildup. Aircraft inspected.',
+        consequence: 'Safe choice! The upper layer is much calmer. Course corrected.',
       },
       {
-        id: 'trust-system',
-        label: 'Trust Anti-Ice System',
-        description: 'System is working. Maintain current flight path.',
+        id: 'power-forward',
+        label: 'Use Max Prop Power',
+        description: 'Just keep moving forward as fast as possible.',
         isCorrect: false,
-        consequence: 'Dangerous! Ice overwhelmed systems. Significant lift loss experienced.',
+        consequence: 'Dangerous! The sideways current pushed the sub into the trench wall.',
       },
     ],
   },
   {
-    id: 'hydraulic',
-    title: 'Hydraulic System Leak',
-    description: 'Hydraulic pressure dropping in system A. Fluid level low. Some flight controls stiffening.',
-    iconType: 'alert',
-    urgency: 'medium',
-    validPhases: ['cruise', 'descent', 'landing'],
-    choices: [
-      {
-        id: 'switch-hydraulic',
-        label: 'Switch to System B',
-        description: 'Isolate leaking system. Transfer to backup hydraulics.',
-        isCorrect: true,
-        consequence: 'Excellent! System B providing full control authority.',
-      },
-      {
-        id: 'land-nearest',
-        label: 'Land at Nearest Suitable Airport',
-        description: "Don't risk losing all hydraulics. Get on ground soon.",
-        isCorrect: true,
-        consequence: 'Prudent decision! Landed safely before leak worsened.',
-      },
-      {
-        id: 'continue-hydraulic',
-        label: 'Continue to Destination',
-        description: 'Some hydraulic pressure remaining. Should be enough.',
-        isCorrect: false,
-        consequence: 'Bad call! Lost all hydraulics on approach. Very difficult landing.',
-      },
-    ],
-  },
-  {
-    id: 'turbulence',
-    title: 'Unexpected Severe Turbulence',
-    description: 'Clear air turbulence encountered. Violent jolts. Cabin crew member injured.',
-    iconType: 'weather',
-    urgency: 'medium',
-    validPhases: ['cruise', 'descent'],
-    choices: [
-      {
-        id: 'slow-secure',
-        label: 'Reduce Speed & Secure Cabin',
-        description: 'Slow to turbulence penetration speed. Ensure all secured.',
-        isCorrect: true,
-        consequence: 'Correct response! Reduced speed minimized structural stress.',
-      },
-      {
-        id: 'altitude-change',
-        label: 'Request Altitude Change',
-        description: 'Ask ATC for different altitude to exit turbulence.',
-        isCorrect: true,
-        consequence: 'Good call! Found smoother air 4,000 feet higher.',
-      },
-      {
-        id: 'power-through',
-        label: 'Maintain Speed and Course',
-        description: 'Turbulence usually passes quickly.',
-        isCorrect: false,
-        consequence: 'Mistake! Multiple injuries. Aircraft exceeded structural limits briefly.',
-      },
-    ],
-  },
-  {
-    id: 'comm-failure',
-    title: 'Communication System Failure',
-    description: 'All radios dead. No contact with ATC. Transponder working. Approaching busy airspace.',
-    iconType: 'zap',
-    urgency: 'medium',
-    validPhases: ['cruise', 'descent', 'landing'],
-    choices: [
-      {
-        id: 'squawk-7600',
-        label: 'Squawk 7600',
-        description: 'Set transponder to radio failure code. Follow lost comm procedures.',
-        isCorrect: true,
-        consequence: 'Textbook! ATC saw your squawk. Traffic cleared for your approach.',
-      },
-      {
-        id: 'backup-radio',
-        label: 'Try Backup Radio Systems',
-        description: 'Attempt communication via alternate frequencies and equipment.',
-        isCorrect: true,
-        consequence: 'Persistence paid off! Handheld radio established contact.',
-      },
-      {
-        id: 'continue-silent',
-        label: 'Continue Flight Silently',
-        description: 'Just fly the airplane. Will sort comms after landing.',
-        isCorrect: false,
-        consequence: 'Near miss! Other traffic not warned of your presence.',
-      },
-    ],
-  },
-  {
-    id: 'cargo-fire',
-    title: 'Cargo Hold Fire Warning',
-    description: 'Smoke detector activated in forward cargo hold. Extinguisher system available.',
+    id: 'diving-planes-jam',
+    title: 'Diving Planes Jammed',
+    description: 'Control surfaces are stuck in the "DIVE" position. Sub is descending rapidly.',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['climb', 'cruise'],
+    validPhases: ['descent', 'cruise'],
     choices: [
       {
-        id: 'extinguish',
-        label: 'Deploy Fire Suppression',
-        description: 'Activate cargo hold fire extinguisher system immediately.',
+        id: 'reverse-thrust',
+        label: 'Full Reverse Propeller',
+        description: 'Use reverse thrust to slow the descent while fixing jam.',
         isCorrect: true,
-        consequence: 'Quick action! Fire suppressed. Smoke clearing from hold.',
+        consequence: 'Excellent! Slowed descent enough to reset the hydraulic actuators.',
       },
       {
-        id: 'divert-immediate',
-        label: 'Divert and Deploy',
-        description: 'Set course for nearest airport while activating fire suppression.',
+        id: 'purge-ballast-jam',
+        label: 'Blow Front Ballast',
+        description: 'Increase nose buoyancy to counter the diving plane angle.',
         isCorrect: true,
-        consequence: 'Excellent judgment! Fire contained. Landed for inspection.',
+        consequence: 'Prudent decision! The sub leveled out despite the jammed planes.',
       },
       {
-        id: 'investigate-fire',
-        label: 'Investigate Before Acting',
-        description: 'Could be false alarm. Delay suppression to confirm.',
+        id: 'steer-course',
+        label: 'Continue Steering',
+        description: 'Try to force the controls until they respond.',
         isCorrect: false,
-        consequence: 'Delay cost valuable time! Fire spread before suppression deployed.',
+        consequence: 'Bad call! Descent became critical before you tried alternate methods.',
+      },
+    ],
+  },
+  {
+    id: 'thermal-vent',
+    title: 'Underwater Thermal Vent',
+    description: 'Sudden heat plume from a hydrothermal vent. Water temperature is melting sensors!',
+    iconType: 'weather',
+    urgency: 'medium',
+    validPhases: ['cruise', 'ascent'],
+    choices: [
+      {
+        id: 'maneuver-away',
+        label: 'Evasive Maneuver',
+        description: 'Sharp turn away from the heat column.',
+        isCorrect: true,
+        consequence: 'Correct response! Escaped the plume before permanent damage.',
+      },
+      {
+        id: 'hull-coolant',
+        label: 'Max External Cooling',
+        description: 'Flood hull thermal jackets with coolant.',
+        isCorrect: true,
+        consequence: 'Good call! Thermal shielding held until the sub cleared the area.',
+      },
+      {
+        id: 'slow-down',
+        label: 'Slow to 1 Knot',
+        description: 'Carefully navigate through the warm water.',
+        isCorrect: false,
+        consequence: 'Mistake! Low speed kept sub in the heat too long. Many sensors melted.',
+      },
+    ],
+  },
+  {
+    id: 'sonar-interference',
+    title: 'Sonar Signal Lost',
+    description: 'Extreme magnetic field from volcanic rocks has blinded the sonar systems.',
+    iconType: 'zap',
+    urgency: 'medium',
+    validPhases: ['cruise', 'ascent', 'docking'],
+    choices: [
+      {
+        id: 'active-ping',
+        label: 'Active High-Freq Ping',
+        description: 'Use intense sonar pulses to cut through the magnetic noise.',
+        isCorrect: true,
+        consequence: 'Textbook! The powerful pings restored visibility of the sea floor.',
+      },
+      {
+        id: 'visual-nav',
+        label: 'Switch to Low-Light Cameras',
+        description: 'Navigate using external floodlights and cameras.',
+        isCorrect: true,
+        consequence: 'Persistence paid off! Close-range cameras allowed safe navigation.',
+      },
+      {
+        id: 'blind-cruise',
+        label: 'Continue at Current Heading',
+        description: 'The path was clear just a moment ago.',
+        isCorrect: false,
+        consequence: 'Near miss! Collision detected with an uncharted sea pinnacle.',
+      },
+    ],
+  },
+  {
+    id: 'docking-fire',
+    title: 'Aft Compartment Fire',
+    description: 'Fire in the propulsion motor room. Fire suppression systems are ready.',
+    iconType: 'alert',
+    urgency: 'high',
+    validPhases: ['cruise', 'ascent', 'docking'],
+    choices: [
+      {
+        id: 'depressurize',
+        label: 'Vent Atmosphere',
+        description: 'Suck the oxygen out of the motor room from outside.',
+        isCorrect: true,
+        consequence: 'Quick action! Fire died out instantly from lack of oxygen.',
+      },
+      {
+        id: 'foam-room',
+        label: 'Deploy Foam Suppression',
+        description: 'Fill the propulsion room with specialized fire-fighting foam.',
+        isCorrect: true,
+        consequence: 'Excellent judgment! Fire contained. Propulsion remains functional.',
+      },
+      {
+        id: 'handhelds',
+        label: 'Send Crew with Extinguishers',
+        description: 'Send professional crew to fight the fire manually.',
+        isCorrect: false,
+        consequence: 'Delay cost valuable time! Fire spread to steering gear before crew arrived.',
       },
     ],
   },
@@ -436,200 +436,134 @@ export const EXTENDED_SCENARIOS: ScenarioData[] = [
 // Escalated scenarios - harder versions that appear after wrong answers
 export const ESCALATED_SCENARIOS: ScenarioData[] = [
   {
-    id: 'weather-escalated',
-    title: 'CRITICAL: Storm Damage Detected',
-    description: 'Previous storm encounter caused structural damage. Multiple warning lights. Passengers panicking.',
+    id: 'storm-escalated',
+    title: 'CRITICAL: Structural Fatigue',
+    description: 'Previous storm encounter caused internal hull stress. Deep groaning sounds. Leak detected!',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['cruise', 'descent'],
-    parentScenarioId: 'weather',
+    validPhases: ['cruise', 'ascent'],
+    parentScenarioId: 'storm',
     isEscalated: true,
     choices: [
       {
-        id: 'emergency-descent',
-        label: 'Emergency Descent & Divert',
-        description: 'Declare emergency, descend immediately, divert to nearest airport.',
+        id: 'emergency-ascent',
+        label: 'Emergency Ascent & Call Base',
+        description: 'Declare emergency, rise slowly, call for repair sub.',
         isCorrect: true,
-        consequence: 'Critical but correct! Emergency landing successful despite damage.',
+        consequence: 'Critical but correct! You made it to the surface before a total collapse.',
       },
       {
-        id: 'assess-continue',
-        label: 'Assess Damage In-Flight',
-        description: 'Try to evaluate extent of damage before deciding.',
+        id: 'deep-diving-limit',
+        label: 'Dive to Seat of Stress',
+        description: 'Counter-pressure by going even deeper.',
         isCorrect: false,
-        consequence: 'Fatal delay! Structural failure occurred during assessment.',
+        consequence: 'Fatal delay! Additional pressure caused a total hull implosion.',
       },
       {
-        id: 'continue-dest',
-        label: 'Continue to Destination',
-        description: 'Aircraft seems flyable. Original airport has better facilities.',
+        id: 'full-speed-base',
+        label: 'Max Speed to Base',
+        description: 'Hurry to safe zone before the sub fails.',
         isCorrect: false,
-        consequence: 'Catastrophic! Aircraft broke apart before reaching destination.',
+        consequence: 'Catastrophic! Engine vibration accelerated the hull failure.',
       },
     ],
   },
   {
-    id: 'birdstrike-escalated',
-    title: 'CRITICAL: Engine Failure Imminent',
-    description: 'Engine #1 from previous bird strike now showing critical damage. Fire warning active!',
+    id: 'breach-escalated',
+    title: 'CRITICAL: Multiple Hull Fractures',
+    description: 'The earlier breach has spread. Multiple decks are reporting rising water levels!',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['climb', 'cruise'],
-    parentScenarioId: 'birdstrike',
+    validPhases: ['cruise', 'ascent'],
+    parentScenarioId: 'hullbreach',
     isEscalated: true,
     choices: [
       {
-        id: 'shutdown-fire',
-        label: 'Shutdown & Fire Suppression',
-        description: 'Cut fuel, activate fire suppression, prepare single-engine operation.',
+        id: 'bulkhead-all',
+        label: 'Seal All Main Bulkheads',
+        description: 'Lock everyone in their current stations and isolate every deck.',
         isCorrect: true,
-        consequence: 'Excellent crisis management! Fire contained. Single-engine landing possible.',
+        consequence: 'Excellent crisis management! Water contained to non-essential areas.',
       },
       {
-        id: 'dual-engine',
-        label: 'Try to Save Engine',
-        description: 'Reduce power and hope engine stabilizes.',
+        id: 'surface-now',
+        label: 'Blow Everything to Surface',
+        description: 'Rapid ascent to get out of the water pressure.',
         isCorrect: false,
-        consequence: 'Engine exploded! Debris damaged second engine. Both engines compromised.',
+        consequence: 'Too much damage! The sub took on too much water and sank before reaching surface.',
       },
       {
-        id: 'ignore-warning',
-        label: 'Warning May Be False',
-        description: 'Sensors could be damaged. Continue monitoring.',
+        id: 'pump-max',
+        label: 'Max Pump Capacity',
+        description: 'Focus all energy on bilge pumps.',
         isCorrect: false,
-        consequence: 'Fire spread to fuel tanks. Catastrophic failure.',
+        consequence: 'Hull failed! Water intake exceeded pump capacity. Vessel lost.',
       },
     ],
   },
   {
-    id: 'gear-escalated',
-    title: 'CRITICAL: Complete Gear System Failure',
-    description: 'All landing gear systems failed. Manual extension not working. Belly landing inevitable.',
+    id: 'ballast-escalated',
+    title: 'CRITICAL: Submarine Imbalance',
+    description: 'Submarine is now vertical. All engines failing. We are sinking tail-first!',
     iconType: 'alert',
     urgency: 'high',
-    validPhases: ['landing'],
-    parentScenarioId: 'gear',
+    validPhases: ['ascent', 'docking'],
+    parentScenarioId: 'ballast',
     isEscalated: true,
     choices: [
       {
-        id: 'prepare-belly',
-        label: 'Prepare for Belly Landing',
-        description: 'Brief passengers, dump fuel, choose longest runway, foam the runway.',
+        id: 'blow-all-forward',
+        label: 'Blow All Fore Ballast',
+        description: 'Dump every liter of water from the front tanks immediately.',
         isCorrect: true,
-        consequence: 'Heroic effort! Belly landing executed. All passengers survived.',
+        consequence: 'Heroic effort! The sub pivoted back to horizontal. Control restored.',
       },
       {
-        id: 'keep-trying',
-        label: 'Keep Trying Gear Extension',
-        description: 'Cycle systems repeatedly. Something might work.',
+        id: 'throttle-forward',
+        label: 'Full Forward Engines',
+        description: 'Try to drive out of the vertical position.',
         isCorrect: false,
-        consequence: 'Wasted time and fuel. Unprepared belly landing caused injuries.',
+        consequence: 'Wasted time! Engines flamed out from lack of fuel intake orientaiton.',
       },
       {
-        id: 'water-ditch',
-        label: 'Ditch in Water',
-        description: 'Water landing might be safer than concrete.',
+        id: 'wait-impact',
+        label: 'Brace for Impact',
+        description: 'Prepare for sea-floor collision.',
         isCorrect: false,
-        consequence: 'Poor decision! Aircraft broke apart on water impact.',
+        consequence: 'Poor decision! Sub imploded upon hitting the trench at high speed.',
       },
     ],
   },
   {
-    id: 'fuel-escalated',
-    title: 'CRITICAL: Engines Flameout',
-    description: 'Both engines have flamed out due to fuel starvation. You are now a glider.',
+    id: 'energy-escalated',
+    title: 'CRITICAL: Total Power Loss',
+    description: 'Energy reserves at 0%. All life support systems have shut down. Darkness.',
     iconType: 'fuel',
     urgency: 'high',
-    validPhases: ['cruise', 'descent'],
-    parentScenarioId: 'fuel',
+    validPhases: ['cruise', 'ascent'],
+    parentScenarioId: 'energy-crisis',
     isEscalated: true,
     choices: [
       {
-        id: 'glide-airport',
-        label: 'Glide to Nearest Airport',
-        description: 'Calculate glide ratio. Head for closest runway within range.',
+        id: 'emergency-buoyancy',
+        label: 'Emergency Buoyancy Release',
+        description: 'Mechanical release of dive weights. No power needed.',
         isCorrect: true,
-        consequence: 'Miracle landing! Reached airport runway with no engine power.',
+        consequence: 'Miracle! Submarine drifted to surface without needing any energy.',
       },
       {
-        id: 'restart-attempt',
-        label: 'Attempt Engine Restart',
-        description: 'Try to restart engines with remaining fuel vapor.',
+        id: 'restart-reactor-vapor',
+        label: 'Manual Core Restart',
+        description: 'Try to jump-start the reactor using service batteries.',
         isCorrect: false,
-        consequence: 'No fuel for restart. Wasted precious altitude. Crashed short of runway.',
+        consequence: 'Failure! Batteries too weak. Wasted precious time as oxygen ran out.',
       },
       {
-        id: 'panic',
-        label: 'Declare Mayday',
-        description: 'Focus on calling for help.',
+        id: 'panic-sonar',
+        label: 'Handheld Radio Ping',
+        description: 'Try to signal for help manually.',
         isCorrect: false,
-        consequence: 'While declaring emergency, lost situational awareness. Crashed in field.',
-      },
-    ],
-  },
-  {
-    id: 'medical-escalated',
-    title: 'CRITICAL: Multiple Medical Emergencies',
-    description: 'Initial patient died. Now other passengers showing symptoms. Possible contamination or contagion.',
-    iconType: 'users',
-    urgency: 'high',
-    validPhases: ['cruise', 'descent'],
-    parentScenarioId: 'medical',
-    isEscalated: true,
-    choices: [
-      {
-        id: 'quarantine-divert',
-        label: 'Quarantine & Emergency Divert',
-        description: 'Isolate affected area, declare medical emergency, divert to airport with medical facilities.',
-        isCorrect: true,
-        consequence: 'Quick thinking! Contamination contained. Specialized medical teams met aircraft.',
-      },
-      {
-        id: 'continue-original',
-        label: 'Continue to Original Destination',
-        description: 'Original airport has good hospitals too.',
-        isCorrect: false,
-        consequence: 'More passengers affected during extra flight time. Some did not survive.',
-      },
-      {
-        id: 'investigate-first',
-        label: 'Investigate Cause First',
-        description: 'Need to understand what is happening before acting.',
-        isCorrect: false,
-        consequence: 'Investigation delayed response. Contamination spread to crew.',
-      },
-    ],
-  },
-  {
-    id: 'engine-escalated',
-    title: 'CRITICAL: Fire Spreading',
-    description: 'Engine fire has spread to wing. Fuel leak detected. Structural integrity compromised.',
-    iconType: 'alert',
-    urgency: 'high',
-    validPhases: ['climb', 'cruise'],
-    parentScenarioId: 'engine',
-    isEscalated: true,
-    choices: [
-      {
-        id: 'emergency-landing-now',
-        label: 'Emergency Landing NOW',
-        description: 'Any surface. Get on ground before wing fails.',
-        isCorrect: true,
-        consequence: 'Desperate but necessary! Off-airport landing. All survived with injuries.',
-      },
-      {
-        id: 'try-extinguish',
-        label: 'Deploy All Extinguishers',
-        description: 'Use every fire suppression system available.',
-        isCorrect: false,
-        consequence: 'Fire too large. Wing separated from aircraft.',
-      },
-      {
-        id: 'find-airport',
-        label: 'Try to Reach Airport',
-        description: 'Nearest airport is 10 minutes away.',
-        isCorrect: false,
-        consequence: 'Wing failed 5 minutes later. No survivors.',
+        consequence: 'While signaling, sub drifted below crush depth. No response received.',
       },
     ],
   },
@@ -638,13 +572,13 @@ export const ESCALATED_SCENARIOS: ScenarioData[] = [
 // Get all available scenarios
 export const ALL_SCENARIOS = [...BASE_SCENARIOS, ...EXTENDED_SCENARIOS];
 
-// Get the current flight phase based on progress percentage
-export function getFlightPhase(progress: number): ScenarioTiming {
-  if (progress < 15) return 'takeoff';
-  if (progress < 35) return 'climb';
+// Get the current dive phase based on progress percentage
+export function getDivePhase(progress: number): ScenarioTiming {
+  if (progress < 15) return 'launch';
+  if (progress < 35) return 'descent';
   if (progress < 75) return 'cruise';
-  if (progress < 95) return 'descent';
-  return 'landing';
+  if (progress < 95) return 'ascent';
+  return 'docking';
 }
 
 // Get scenarios for a playthrough with phase-aware distribution
@@ -653,38 +587,38 @@ export function getScenariosForPlaythrough(
   scenarioCount: number
 ): ScenarioData[] {
   // Mix base and extended scenarios based on play count
-  const availableScenarios = playCount === 0 
+  const availableScenarios = playCount === 0
     ? [...BASE_SCENARIOS]
     : [...ALL_SCENARIOS];
-  
+
   // Shuffle
   const shuffled = [...availableScenarios].sort(() => Math.random() - 0.5);
-  
+
   // Return requested count
   return shuffled.slice(0, Math.min(scenarioCount, shuffled.length));
 }
 
-// Get a scenario valid for the current flight phase
+// Get a scenario valid for the current dive phase
 export function getScenarioForPhase(
   phase: ScenarioTiming,
   usedScenarioIds: string[],
   playCount: number
 ): ScenarioData | null {
-  const availableScenarios = playCount === 0 
+  const availableScenarios = playCount === 0
     ? [...BASE_SCENARIOS]
     : [...ALL_SCENARIOS];
-  
+
   // Filter by phase and exclude already used scenarios
   const validScenarios = availableScenarios.filter(
     s => s.validPhases.includes(phase) && !usedScenarioIds.includes(s.id)
   );
-  
+
   if (validScenarios.length === 0) {
     // Fallback: any unused scenario
     const fallback = availableScenarios.filter(s => !usedScenarioIds.includes(s.id));
     return fallback.length > 0 ? fallback[Math.floor(Math.random() * fallback.length)] : null;
   }
-  
+
   // Random selection from valid scenarios
   return validScenarios[Math.floor(Math.random() * validScenarios.length)];
 }
@@ -697,19 +631,19 @@ export function getEscalatedScenario(
   const directEscalation = ESCALATED_SCENARIOS.find(
     s => s.parentScenarioId === failedScenarioId
   );
-  
+
   if (directEscalation) {
     return directEscalation;
   }
-  
+
   // If no direct escalation, return a random high-urgency escalated scenario
   const availableEscalated = ESCALATED_SCENARIOS.filter(
     s => s.urgency === 'high'
   );
-  
+
   if (availableEscalated.length > 0) {
     return availableEscalated[Math.floor(Math.random() * availableEscalated.length)];
   }
-  
+
   return null;
 }

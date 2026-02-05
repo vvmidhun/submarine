@@ -1,27 +1,27 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Difficulty, DIFFICULTY_CONFIG, FlightPlanData } from '@/types/game';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { Difficulty, DIFFICULTY_CONFIG, DivePlanData } from '@/types/game';
 
-export interface CockpitState {
+export interface BridgeState {
   battery: boolean;
-  avionics: boolean;
-  fuelPumps: boolean;
+  sonar: boolean;
+  fuelPumps: boolean; // Keep as fuelPumps for internal logic, or rename to energyConverters
   navigationLights: boolean;
-  antiIce: boolean;
+  antiIce: boolean; // Rename to hullHeating?
   autopilot: boolean;
-  seatbeltSign: boolean;
-  landingGear: boolean;
-  flaps: number;
-  parkingBrake: boolean;
-  apu: boolean;
+  seatbeltSign: boolean; // Rename to depthWarning?
+  ballastTanks: boolean; // NEW
+  flaps: number; // Rename to divingPlanes?
+  parkingBrake: boolean; // Rename to anchor?
+  apu: boolean; // Rename to reactor?
   engineStart: boolean;
 }
 
-export interface FlightData {
-  altitude: number;
+export interface DiveData {
+  depth: number;
   speed: number;
   heading: number;
-  fuel: number;
-  weather: 'clear' | 'cloudy' | 'stormy';
+  energy: number;
+  seaCondition: 'clear' | 'turbulent' | 'stormy';
   riskLevel: 'green' | 'yellow' | 'red';
   distanceCovered: number; // percentage of journey
   totalDistance: number; // nautical miles
@@ -29,16 +29,17 @@ export interface FlightData {
 
 export interface GameState {
   currentLevel: 'intro' | 'level1' | 'level2' | 'final';
-  cockpitState: CockpitState;
-  flightData: FlightData;
-  preflightComplete: boolean;
-  flightPlanComplete: boolean;
-  flightPlan: FlightPlanData | null;
+  bridgeState: BridgeState;
+  diveData: DiveData;
+  preDiveComplete: boolean;
+  divePlanComplete: boolean;
+  divePlan: DivePlanData | null;
   safetyScore: number;
   decisionAccuracy: number;
   emergenciesHandled: number;
   missionSuccess: boolean | null;
   failureReason: string | null;
+  failureType: 'drowned' | 'exploded' | null;
   currentScenario: number;
   scenarioHistory: string[];
   difficulty: Difficulty;
@@ -48,59 +49,60 @@ export interface GameState {
 
 interface GameContextType {
   gameState: GameState;
-  toggleSwitch: (key: keyof CockpitState) => void;
-  setFlaps: (value: number) => void;
-  completePreFlight: () => void;
-  completeFlightPlan: (plan: FlightPlanData) => void;
+  toggleSwitch: (key: keyof BridgeState) => void;
+  setDivingPlanes: (value: number) => void;
+  completePreDive: () => void;
+  completeDivePlan: (plan: DivePlanData) => void;
   handleEmergencyChoice: (choice: string, correct: boolean) => void;
   handleTimeout: () => void;
   setLevel: (level: GameState['currentLevel']) => void;
   nextScenario: () => void;
-  completeMission: (success: boolean, reason?: string) => void;
+  completeMission: (success: boolean, reason?: string, failureType?: 'drowned' | 'exploded') => void;
   resetGame: () => void;
-  updateFlightData: (data: Partial<FlightData>) => void;
+  updateDiveData: (data: Partial<DiveData> | ((prev: DiveData) => Partial<DiveData>)) => void;
   setDifficulty: (difficulty: Difficulty) => void;
   getDifficultySettings: () => typeof DIFFICULTY_CONFIG[Difficulty];
 }
 
-const initialCockpitState: CockpitState = {
+const initialBridgeState: BridgeState = {
   battery: false,
-  avionics: false,
+  sonar: false,
   fuelPumps: false,
   navigationLights: false,
   antiIce: false,
   autopilot: false,
   seatbeltSign: false,
-  landingGear: true,
+  ballastTanks: true, // Initial state: on surface
   flaps: 0,
   parkingBrake: true,
   apu: false,
   engineStart: false,
 };
 
-const initialFlightData: FlightData = {
-  altitude: 0,
+const initialDiveData: DiveData = {
+  depth: 0,
   speed: 0,
-  heading: 270,
-  fuel: 100,
-  weather: 'clear',
+  heading: 180,
+  energy: 100,
+  seaCondition: 'clear',
   riskLevel: 'green',
   distanceCovered: 0,
-  totalDistance: 2475,
+  totalDistance: 2272,
 };
 
 const initialGameState: GameState = {
   currentLevel: 'intro',
-  cockpitState: initialCockpitState,
-  flightData: initialFlightData,
-  preflightComplete: false,
-  flightPlanComplete: false,
-  flightPlan: null,
+  bridgeState: initialBridgeState,
+  diveData: initialDiveData,
+  preDiveComplete: false,
+  divePlanComplete: false,
+  divePlan: null,
   safetyScore: 100,
   decisionAccuracy: 100,
   emergenciesHandled: 0,
   missionSuccess: null,
   failureReason: null,
+  failureType: null,
   currentScenario: 0,
   scenarioHistory: [],
   difficulty: 'normal',
@@ -115,145 +117,153 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const getDifficultySettings = () => DIFFICULTY_CONFIG[gameState.difficulty];
 
-  const toggleSwitch = (key: keyof CockpitState) => {
+  const toggleSwitch = useCallback((key: keyof BridgeState) => {
     setGameState((prev) => ({
       ...prev,
-      cockpitState: {
-        ...prev.cockpitState,
-        [key]: !prev.cockpitState[key],
+      bridgeState: {
+        ...prev.bridgeState,
+        [key]: !prev.bridgeState[key],
       },
     }));
-  };
+  }, []);
 
-  const setFlaps = (value: number) => {
+  const setDivingPlanes = useCallback((value: number) => {
     setGameState((prev) => ({
       ...prev,
-      cockpitState: {
-        ...prev.cockpitState,
+      bridgeState: {
+        ...prev.bridgeState,
         flaps: value,
       },
     }));
-  };
+  }, []);
 
-  const completePreFlight = () => {
+  const completePreDive = useCallback(() => {
     setGameState((prev) => ({
       ...prev,
-      preflightComplete: true,
-      flightData: {
-        ...prev.flightData,
-        altitude: 35000,
-        speed: 480,
+      preDiveComplete: true,
+      diveData: {
+        ...prev.diveData,
+        depth: 200, // Initial dive depth
+        speed: 15, // knots
       },
     }));
-  };
+  }, []);
 
-  const completeFlightPlan = (plan: FlightPlanData) => {
+  const completeDivePlan = useCallback((plan: DivePlanData) => {
     setGameState((prev) => ({
       ...prev,
-      flightPlanComplete: true,
-      flightPlan: plan,
-      flightData: {
-        ...prev.flightData,
-        totalDistance: plan.route?.distance || 2475,
-        fuel: 100, // Full tank after planning
+      divePlanComplete: true,
+      divePlan: plan,
+      diveData: {
+        ...prev.diveData,
+        totalDistance: plan.route?.distance || 2272,
+        energy: 100, // Full battery after planning
       },
     }));
-  };
+  }, []);
 
-  const handleEmergencyChoice = (choice: string, correct: boolean) => {
-    const settings = getDifficultySettings();
-    const penalty = 15 * settings.penaltyMultiplier;
-    const fuelPenalty = correct ? 5 : 15 * settings.penaltyMultiplier;
+  const handleEmergencyChoice = useCallback((choiceId: string, correct: boolean) => {
+    setGameState((prev) => {
+      const settings = DIFFICULTY_CONFIG[prev.difficulty];
+      const penalty = 15 * settings.penaltyMultiplier;
+      const energyPenalty = correct ? 5 : 15 * settings.penaltyMultiplier;
 
-    setGameState((prev) => ({
-      ...prev,
-      emergenciesHandled: prev.emergenciesHandled + 1,
-      safetyScore: correct ? prev.safetyScore : Math.max(0, prev.safetyScore - penalty),
-      decisionAccuracy: correct
-        ? prev.decisionAccuracy
-        : Math.max(0, prev.decisionAccuracy - (20 * settings.penaltyMultiplier)),
-      scenarioHistory: [...prev.scenarioHistory, choice],
-      timedOut: false,
-      flightData: {
-        ...prev.flightData,
-        fuel: Math.max(0, prev.flightData.fuel - fuelPenalty),
-        riskLevel: correct ? prev.flightData.riskLevel : 'yellow',
-      },
-    }));
-  };
+      return {
+        ...prev,
+        emergenciesHandled: prev.emergenciesHandled + 1,
+        safetyScore: correct ? prev.safetyScore : Math.max(0, prev.safetyScore - penalty),
+        decisionAccuracy: correct
+          ? prev.decisionAccuracy
+          : Math.max(0, prev.decisionAccuracy - (20 * settings.penaltyMultiplier)),
+        scenarioHistory: [...prev.scenarioHistory, choiceId],
+        timedOut: false,
+        diveData: {
+          ...prev.diveData,
+          energy: Math.max(0, prev.diveData.energy - energyPenalty),
+          riskLevel: correct ? prev.diveData.riskLevel : 'yellow',
+        },
+      };
+    });
+  }, []);
 
-  const handleTimeout = () => {
-    const settings = getDifficultySettings();
-    const penalty = 20 * settings.penaltyMultiplier;
+  const handleTimeout = useCallback(() => {
+    setGameState((prev) => {
+      const settings = DIFFICULTY_CONFIG[prev.difficulty];
+      const penalty = 20 * settings.penaltyMultiplier;
 
-    setGameState((prev) => ({
-      ...prev,
-      timedOut: true,
-      safetyScore: Math.max(0, prev.safetyScore - penalty),
-      decisionAccuracy: Math.max(0, prev.decisionAccuracy - (25 * settings.penaltyMultiplier)),
-      flightData: {
-        ...prev.flightData,
-        fuel: Math.max(0, prev.flightData.fuel - 10),
-        riskLevel: 'red',
-      },
-    }));
-  };
+      return {
+        ...prev,
+        timedOut: true,
+        safetyScore: Math.max(0, prev.safetyScore - penalty),
+        decisionAccuracy: Math.max(0, prev.decisionAccuracy - (25 * settings.penaltyMultiplier)),
+        diveData: {
+          ...prev.diveData,
+          energy: Math.max(0, prev.diveData.energy - 10),
+          riskLevel: 'red',
+        },
+      };
+    });
+  }, []);
 
-  const setLevel = (level: GameState['currentLevel']) => {
+  const setLevel = useCallback((level: GameState['currentLevel']) => {
     setGameState((prev) => ({ ...prev, currentLevel: level }));
-  };
+  }, []);
 
-  const nextScenario = () => {
+  const nextScenario = useCallback(() => {
     setGameState((prev) => ({
       ...prev,
       currentScenario: prev.currentScenario + 1,
       timedOut: false,
     }));
-  };
+  }, []);
 
-  const completeMission = (success: boolean, reason?: string) => {
+  const completeMission = useCallback((success: boolean, reason?: string, failureType?: 'drowned' | 'exploded') => {
     setGameState((prev) => ({
       ...prev,
       currentLevel: 'final',
       missionSuccess: success,
       failureReason: reason || null,
+      failureType: failureType || null,
     }));
-  };
+  }, []);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setGameState((prev) => ({
       ...initialGameState,
       difficulty: prev.difficulty,
       playCount: prev.playCount + 1,
     }));
-  };
+  }, []);
 
-  const updateFlightData = (data: Partial<FlightData>) => {
+  const updateDiveData = useCallback((data: Partial<DiveData> | ((prev: DiveData) => Partial<DiveData>)) => {
     setGameState((prev) => ({
       ...prev,
-      flightData: { ...prev.flightData, ...data },
+      diveData: {
+        ...prev.diveData,
+        ...(typeof data === 'function' ? data(prev.diveData) : data),
+      },
     }));
-  };
+  }, []);
 
-  const setDifficulty = (difficulty: Difficulty) => {
+  const setDifficulty = useCallback((difficulty: Difficulty) => {
     setGameState((prev) => ({ ...prev, difficulty }));
-  };
+  }, []);
 
   return (
     <GameContext.Provider
       value={{
         gameState,
         toggleSwitch,
-        setFlaps,
-        completePreFlight,
-        completeFlightPlan,
+        setDivingPlanes,
+        completePreDive,
+        completeDivePlan,
         handleEmergencyChoice,
         handleTimeout,
         setLevel,
         nextScenario,
         completeMission,
         resetGame,
-        updateFlightData,
+        updateDiveData,
         setDifficulty,
         getDifficultySettings,
       }}

@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
-import { 
-  Trophy, XCircle, Shield, Target, Brain, Users, 
+import {
+  Trophy, XCircle, Shield, Target, Brain, Users,
   RotateCcw, Book, Rocket, CheckCircle, AlertTriangle, LogOut
 } from 'lucide-react';
-import { FlightManual } from '@/components/game/FlightManual';
-import cockpitHero from '@/assets/cockpit-hero.jpg';
+import { DiveManual } from '@/components/game/DiveManual';
+import submarineHero from '@/assets/cockpit-hero.jpg';
 
 export default function FinalPage() {
   const navigate = useNavigate();
@@ -44,42 +44,39 @@ export default function FinalPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{ backgroundImage: `url(${cockpitHero})` }}
+        style={{ backgroundImage: `url(${submarineHero})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
 
       <div className="relative z-10 container mx-auto px-4 py-12 min-h-screen flex items-center justify-center">
         <div className="max-w-2xl w-full">
           {/* Result Card */}
-          <div className={`cockpit-panel p-8 border-2 ${
-            missionSuccess ? 'border-success' : 'border-destructive'
-          }`}>
+          <div className={`bridge-panel p-8 border-2 ${missionSuccess === false ? 'border-destructive' : 'border-success'
+            }`}>
             {/* Header */}
             <div className="text-center mb-8">
-              <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${
-                missionSuccess 
-                  ? 'bg-success/20 border-2 border-success' 
-                  : 'bg-destructive/20 border-2 border-destructive'
-              }`}>
-                {missionSuccess ? (
-                  <Trophy className="w-10 h-10 text-success" />
-                ) : (
+              <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${missionSuccess === false
+                ? 'bg-destructive/20 border-2 border-destructive'
+                : 'bg-success/20 border-2 border-success'
+                }`}>
+                {missionSuccess === false ? (
                   <XCircle className="w-10 h-10 text-destructive" />
+                ) : (
+                  <Trophy className="w-10 h-10 text-success" />
                 )}
               </div>
-              
-              <h1 className={`text-3xl font-display font-bold ${
-                missionSuccess ? 'text-success' : 'text-destructive'
-              }`}>
-                {missionSuccess ? 'MISSION COMPLETED' : 'MISSION INCOMPLETE'}
+
+              <h1 className={`text-3xl font-display font-bold ${missionSuccess === false ? 'text-destructive' : 'text-success'
+                }`}>
+                {missionSuccess === false ? 'MISSION INCOMPLETE' : 'MISSION COMPLETED'}
               </h1>
-              
+
               <p className="text-muted-foreground mt-2">
-                {missionSuccess 
-                  ? 'You safely assisted the Captain and ensured a smooth flight.'
-                  : 'The mission could not be completed successfully.'}
+                {missionSuccess === false
+                  ? 'The deep-sea mission could not be completed successfully.'
+                  : 'You safely assisted the Commander and ensured a successful voyage.'}
               </p>
             </div>
 
@@ -97,22 +94,22 @@ export default function FinalPage() {
             {/* Performance Summary */}
             <div className="space-y-4 mb-8">
               <h2 className="font-display text-primary text-lg text-center">Performance Summary</h2>
-              
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="cockpit-screen p-4 text-center">
+                <div className="bridge-screen p-4 text-center">
                   <Shield className="w-6 h-6 mx-auto mb-2 text-success" />
                   <p className="text-2xl font-bold digital-display">{safetyScore}%</p>
                   <p className="text-xs text-muted-foreground">Safety Score</p>
                 </div>
-                
-                <div className="cockpit-screen p-4 text-center">
+
+                <div className="bridge-screen p-4 text-center">
                   <Target className="w-6 h-6 mx-auto mb-2 text-secondary" />
                   <p className="text-2xl font-bold digital-display">{decisionAccuracy}%</p>
                   <p className="text-xs text-muted-foreground">Decision Accuracy</p>
                 </div>
               </div>
 
-              <div className="cockpit-screen p-4">
+              <div className="bridge-screen p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Overall Rating:</span>
                   <span className={`font-display text-lg ${performance.color}`}>
@@ -127,7 +124,7 @@ export default function FinalPage() {
             </div>
 
             {/* Skills Gained */}
-            {missionSuccess && (
+            {missionSuccess !== false && (
               <div className="mb-8">
                 <h2 className="font-display text-primary text-lg text-center mb-4">Skills Demonstrated</h2>
                 <div className="grid grid-cols-2 gap-3">
@@ -147,15 +144,15 @@ export default function FinalPage() {
             )}
 
             {/* Learning Tip for failure */}
-            {!missionSuccess && (
+            {missionSuccess === false && (
               <div className="mb-8 p-4 bg-primary/10 border border-primary/30 rounded-lg">
                 <div className="flex items-center gap-2 text-primary mb-2">
                   <Book className="w-5 h-5" />
-                  <span className="font-display">Learning Tip</span>
+                  <span className="font-display">Strategic Tip</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  "Pilots prioritize safety over schedule. When in doubt, always choose the safer option. 
-                  Remember: Aviate → Navigate → Communicate."
+                  "Submarine commanders prioritize hull integrity over speed. When in doubt, always choose the option that protects the vessel.
+                  Remember: Float → Fix → Communicate."
                 </p>
               </div>
             )}
@@ -164,25 +161,25 @@ export default function FinalPage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleRetry}
-                className="btn-cockpit flex items-center justify-center gap-2"
+                className="btn-bridge flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
-                {missionSuccess ? 'Play Again' : 'Retry Mission'}
+                {missionSuccess !== false ? 'Play Again' : 'Retry Mission'}
               </button>
-              
-              <FlightManual />
-              
+
+              <DiveManual />
+
               <button
                 onClick={handleAdvanced}
-                className="btn-cockpit-primary flex items-center justify-center gap-2"
+                className="btn-bridge-primary flex items-center justify-center gap-2"
               >
                 <Rocket className="w-4 h-4" />
-                {missionSuccess ? 'Try Advanced Mission' : 'Try Again'}
+                {missionSuccess !== false ? 'Try Advanced Mission' : 'Try Again'}
               </button>
-              
+
               <button
                 onClick={handleExit}
-                className="btn-cockpit flex items-center justify-center gap-2 border-muted-foreground/50"
+                className="btn-bridge flex items-center justify-center gap-2 border-muted-foreground/50"
               >
                 <LogOut className="w-4 h-4" />
                 Exit
@@ -191,8 +188,8 @@ export default function FinalPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            CO-PILOT AI • Flight Simulation Training System
+          <p className="text-center text-xs text-muted-foreground mt-6 uppercase tracking-widest">
+            MISSION ADVISOR AI • Submarine Simulation Training System
           </p>
         </div>
       </div>

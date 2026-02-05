@@ -20,7 +20,7 @@ const App = () => (
         <SoundProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter basename="/user/gamified/Aipilot-skyn">
+          <BrowserRouter basename="/user/gamified/DeepSea-Sub/">
             <Routes>
               <Route path="/" element={<IntroPage />} />
               <Route path="/level1" element={<Level1Page />} />

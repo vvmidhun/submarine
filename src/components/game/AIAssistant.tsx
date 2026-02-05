@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
+import { Bot, AlertTriangle, CheckCircle, Info, XCircle, Anchor } from 'lucide-react';
 
 interface AIMessage {
   id: string;
@@ -35,34 +35,34 @@ export function AIAssistant({ messages, className }: AIAssistantProps) {
   };
 
   return (
-    <div className={cn('cockpit-panel p-4', className)}>
+    <div className={cn('bridge-panel border-cyan-500/30 p-4', className)}>
       <div className="flex items-center gap-2 mb-3 border-b border-border pb-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
-          <Bot className="w-5 h-5 text-secondary-foreground" />
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-600 to-cyan-400 flex items-center justify-center shadow-[0_0_10px_rgba(34,211,238,0.5)]">
+          <Bot className="w-5 h-5 text-white" />
         </div>
-        <div>
-          <h3 className="text-sm font-display text-primary">AI CO-PILOT</h3>
-          <p className="text-[10px] text-muted-foreground">FLIGHT ADVISORY SYSTEM</p>
+        <div className="flex-1">
+          <h3 className="text-sm font-display text-cyan-400">BRIDGE ADVISOR</h3>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Deep Sea Monitoring</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          <span className="text-[10px] text-success">ONLINE</span>
+          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[10px] text-cyan-400 font-bold">ONLINE</span>
         </div>
       </div>
 
-      <div className="space-y-2 max-h-48 overflow-y-auto">
+      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
         {displayedMessages.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground text-sm">
-            <Bot className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>Systems nominal. Ready for commands.</p>
+            <Anchor className="w-8 h-8 mx-auto mb-2 opacity-30" />
+            <p className="text-[10px] uppercase font-display">Awaiting sensor data...</p>
           </div>
         ) : (
           displayedMessages.map((msg) => (
             <div
               key={msg.id}
               className={cn(
-                'ai-alert animate-fade-in-up',
-                msg.type === 'info' && 'ai-alert-info',
+                'ai-alert animate-fade-in-up border-l-4',
+                msg.type === 'info' && 'bg-cyan-500/10 border-cyan-500 text-cyan-100',
                 msg.type === 'warning' && 'ai-alert-warning',
                 msg.type === 'danger' && 'ai-alert-danger',
                 msg.type === 'success' && 'ai-alert-success'

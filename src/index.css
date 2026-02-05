@@ -1,14 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
-
 @layer base {
   :root {
-    /* Cockpit Dark Theme */
-    --background: 220 25% 8%;
-    --foreground: 45 100% 95%;
+    /* Bridge Dark Theme - Marine Overhaul */
+    --background: 222 47% 11%;
+    --foreground: 180 100% 97%;
 
     --card: 220 20% 12%;
     --card-foreground: 45 100% 95%;
@@ -16,9 +16,9 @@
     --popover: 220 20% 10%;
     --popover-foreground: 45 100% 95%;
 
-    /* Amber - Primary cockpit instrument color */
-    --primary: 35 100% 50%;
-    --primary-foreground: 220 25% 8%;
+    /* Sonar Cyan - Primary bridge instrument color */
+    --primary: 180 100% 50%;
+    --primary-foreground: 222 47% 11%;
 
     /* Cyan - Digital display color */
     --secondary: 185 100% 50%;
@@ -48,21 +48,19 @@
 
     --radius: 0.5rem;
 
-    /* Custom cockpit variables */
+    /* Custom bridge variables */
     --glow-amber: 0 0 20px hsl(35 100% 50% / 0.5);
-    --glow-cyan: 0 0 20px hsl(185 100% 50% / 0.5);
-    --glow-green: 0 0 15px hsl(140 70% 45% / 0.6);
-    --glow-red: 0 0 20px hsl(0 85% 55% / 0.6);
-    
-    --panel-gradient: linear-gradient(180deg, hsl(220 20% 14%) 0%, hsl(220 25% 8%) 100%);
-    --instrument-border: 1px solid hsl(220 15% 30%);
-    --screen-scanline: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      hsl(185 100% 50% / 0.03) 2px,
-      hsl(185 100% 50% / 0.03) 4px
-    );
+    --glow-cyan: 0 0 20px hsl(180 100% 50% / 0.6);
+    --glow-green: 0 0 15px hsl(150 100% 50% / 0.5);
+    --glow-red: 0 0 20px hsl(0 85% 60% / 0.6);
+
+    --panel-gradient: linear-gradient(180deg, rgba(8, 47, 73, 0.6) 0%, rgba(2, 6, 23, 0.8) 100%);
+    --instrument-border: 1px solid hsl(180 50% 30%);
+    --screen-scanline: repeating-linear-gradient(0deg,
+        transparent,
+        transparent 2px,
+        hsl(185 100% 50% / 0.03) 2px,
+        hsl(185 100% 50% / 0.03) 4px);
 
     --sidebar-background: 220 20% 10%;
     --sidebar-foreground: 45 100% 95%;
@@ -85,30 +83,47 @@
     font-family: 'Share Tech Mono', monospace;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Orbitron', sans-serif;
   }
 }
 
 @layer components {
-  .cockpit-panel {
-    @apply bg-card rounded-lg border border-border;
+  .bridge-panel {
+    @apply bg-card/60 backdrop-blur-md rounded-lg border border-primary/20;
     background: var(--panel-gradient);
-    box-shadow: inset 0 1px 0 hsl(220 15% 30% / 0.5),
-                0 4px 20px hsl(0 0% 0% / 0.5);
+    box-shadow: inset 0 1px 0 hsl(180 50% 30% / 0.3),
+      0 4px 20px hsl(0 0% 0% / 0.5);
   }
 
-  .cockpit-screen {
+  .bridge-screen {
     @apply relative overflow-hidden rounded bg-black/50;
     border: var(--instrument-border);
   }
 
-  .cockpit-screen::after {
+  .bridge-screen::after {
     content: '';
     position: absolute;
     inset: 0;
     background: var(--screen-scanline);
     pointer-events: none;
+    animation: sonar-sweep 4s linear infinite;
+    opacity: 0.3;
+  }
+
+  .marine-panel {
+    @apply bg-card/40 backdrop-blur-lg border border-primary/30 shadow-lg;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
   }
 
   .switch-on {
@@ -142,7 +157,7 @@
     text-shadow: var(--glow-amber);
   }
 
-  .btn-cockpit {
+  .btn-bridge {
     @apply relative px-6 py-3 font-bold uppercase tracking-wider;
     @apply bg-gradient-to-b from-muted to-card;
     @apply border-2 border-primary/50 rounded-md;
@@ -152,8 +167,8 @@
     font-family: 'Orbitron', sans-serif;
   }
 
-  .btn-cockpit-primary {
-    @apply btn-cockpit bg-gradient-to-b from-primary to-primary/80;
+  .btn-bridge-primary {
+    @apply btn-bridge bg-gradient-to-b from-primary to-primary/80;
     @apply text-primary-foreground border-primary;
     @apply hover:from-primary/90 hover:to-primary/70;
   }
@@ -163,7 +178,7 @@
     @apply bg-gradient-to-br from-card to-background;
     @apply border-4 border-border;
     box-shadow: inset 0 2px 10px hsl(0 0% 0% / 0.5),
-                0 2px 10px hsl(0 0% 0% / 0.3);
+      0 2px 10px hsl(0 0% 0% / 0.3);
   }
 
   .ai-alert {
@@ -190,19 +205,41 @@
 
 @layer utilities {
   @keyframes pulse-glow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
   }
 
   @keyframes flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.95; }
-    75% { opacity: 0.98; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.95;
+    }
+
+    75% {
+      opacity: 0.98;
+    }
   }
 
   @keyframes scan {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
+    0% {
+      transform: translateY(-100%);
+    }
+
+    100% {
+      transform: translateY(100%);
+    }
   }
 
   @keyframes fade-in-up {
@@ -210,6 +247,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -217,8 +255,13 @@
   }
 
   @keyframes typewriter {
-    from { width: 0; }
-    to { width: 100%; }
+    from {
+      width: 0;
+    }
+
+    to {
+      width: 100%;
+    }
   }
 
   .animate-fade-in-up {
@@ -233,9 +276,55 @@
     animation: scan 3s linear infinite;
   }
 
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
-  .delay-500 { animation-delay: 500ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  @keyframes sonar-sweep {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 0 20px;
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
+
+HTML,
+body {
+  background-image: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+  min-height: 100vh;
 }

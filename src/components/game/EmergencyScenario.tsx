@@ -23,13 +23,13 @@ export interface Scenario {
 // Convert ScenarioData to Scenario with icon
 export function scenarioDataToScenario(data: ScenarioData): Scenario {
   const iconMap: Record<string, React.ReactNode> = {
-    weather: <CloudLightning className="w-6 h-6 text-warning-foreground" />,
-    shield: <Shield className="w-6 h-6 text-primary-foreground" />,
-    alert: <AlertTriangle className="w-6 h-6 text-destructive-foreground" />,
-    users: <Users className="w-6 h-6 text-destructive-foreground" />,
-    fuel: <Fuel className="w-6 h-6 text-warning-foreground" />,
-    zap: <Zap className="w-6 h-6 text-warning-foreground" />,
-    thermometer: <Thermometer className="w-6 h-6 text-secondary-foreground" />,
+    storm: <CloudLightning className="w-6 h-6 text-cyan-400" />,
+    hullbreach: <Shield className="w-6 h-6 text-primary-foreground" />,
+    pressure: <AlertTriangle className="w-6 h-6 text-destructive-foreground" />,
+    medical: <Users className="w-6 h-6 text-destructive-foreground" />,
+    energy: <Fuel className="w-6 h-6 text-warning-foreground" />,
+    electrical: <Zap className="w-6 h-6 text-warning-foreground" />,
+    reactor: <Thermometer className="w-6 h-6 text-secondary-foreground" />,
   };
 
   return {
@@ -46,12 +46,12 @@ interface EmergencyScenarioProps {
   disabled?: boolean;
 }
 
-export function EmergencyScenario({ 
-  scenario, 
-  onChoice, 
+export function EmergencyScenario({
+  scenario,
+  onChoice,
   onTimeout,
   timerSeconds,
-  disabled = false 
+  disabled = false
 }: EmergencyScenarioProps) {
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -64,19 +64,19 @@ export function EmergencyScenario({
 
   const handleChoice = (choiceId: string) => {
     if (disabled || showResult) return;
-    
+
     const choice = scenario.choices.find((c) => c.id === choiceId);
     if (!choice) return;
 
     setSelectedChoice(choiceId);
     setShowResult(true);
-    
+
     if (choice.isCorrect) {
       playSuccessSound();
     } else {
       playErrorSound();
     }
-    
+
     setTimeout(() => {
       onChoice(choiceId, choice.isCorrect, choice.consequence);
     }, 2000);
@@ -86,7 +86,7 @@ export function EmergencyScenario({
     if (showResult) return;
     playErrorSound();
     setShowResult(true);
-    
+
     // Auto-select wrong choice on timeout
     const wrongChoice = scenario.choices.find(c => !c.isCorrect);
     if (wrongChoice) {
@@ -105,11 +105,11 @@ export function EmergencyScenario({
   };
 
   return (
-    <div className={cn('cockpit-panel p-6 border-2', urgencyColors[scenario.urgency])}>
+    <div className={cn('bridge-panel p-6 border-2', urgencyColors[scenario.urgency])}>
       {/* Timer */}
       {timerSeconds && !showResult && (
-        <DecisionTimer 
-          seconds={timerSeconds} 
+        <DecisionTimer
+          seconds={timerSeconds}
           onTimeout={handleTimeout}
           isPaused={showResult}
           className="mb-4"
@@ -120,8 +120,8 @@ export function EmergencyScenario({
       <div className="flex items-start gap-4 mb-6">
         <div className={cn(
           'w-12 h-12 rounded-full flex items-center justify-center',
-          scenario.urgency === 'high' ? 'bg-destructive' : 
-          scenario.urgency === 'medium' ? 'bg-primary' : 'bg-warning'
+          scenario.urgency === 'high' ? 'bg-destructive' :
+            scenario.urgency === 'medium' ? 'bg-primary' : 'bg-warning'
         )}>
           {scenario.icon}
         </div>
@@ -130,8 +130,8 @@ export function EmergencyScenario({
             <span className={cn(
               'text-xs font-display uppercase px-2 py-0.5 rounded',
               scenario.urgency === 'high' ? 'bg-destructive text-destructive-foreground' :
-              scenario.urgency === 'medium' ? 'bg-primary text-primary-foreground' : 
-              'bg-warning text-warning-foreground'
+                scenario.urgency === 'medium' ? 'bg-primary text-primary-foreground' :
+                  'bg-warning text-warning-foreground'
             )}>
               {scenario.urgency} priority
             </span>
@@ -156,7 +156,7 @@ export function EmergencyScenario({
         {scenario.choices.map((choice) => {
           const isSelected = selectedChoice === choice.id;
           const showFeedback = showResult && isSelected;
-          
+
           return (
             <button
               key={choice.id}

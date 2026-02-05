@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Bot, Clock, Award, Plane, Shield, Brain, Zap } from 'lucide-react';
+import { Bot, Clock, Award, Anchor, Shield, Brain, Zap } from 'lucide-react';
 
 interface AICoPilotModalProps {
   trigger?: React.ReactNode;
@@ -17,21 +17,21 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
     name: 'ARIA-7',
     designation: 'Advanced Real-time Intelligence Assistant',
     version: '7.2.1',
-    flightHours: 125000,
+    diveHours: 125000,
     missionsCompleted: 8450,
-    expertiseLevel: 'Master Aviator',
+    expertiseLevel: 'Master Deep-Sea Commander',
     certifications: [
-      'Multi-Engine Rating',
-      'Instrument Flight Rules (IFR)',
-      'Emergency Response Protocol',
-      'Weather Analysis Systems',
-      'Navigation & Route Optimization',
+      'Deep-Sea Navigation (DSN)',
+      'High-Pressure Hull Safety',
+      'Reactor Operations & Thermal Mgmt',
+      'Sonar Echo Interpretation',
+      'Advanced Buoyancy Control',
     ],
     specializations: [
       { icon: Shield, label: 'Safety Protocols', value: '99.97%' },
       { icon: Brain, label: 'Decision Support', value: 'Advanced' },
       { icon: Zap, label: 'Response Time', value: '<0.1s' },
-      { icon: Plane, label: 'Aircraft Types', value: '47+' },
+      { icon: Anchor, label: 'Vessel Types', value: '12+' },
     ],
   };
 
@@ -39,9 +39,9 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
     <Dialog>
       <DialogTrigger asChild>
         {trigger || (
-          <button className="btn-cockpit flex items-center gap-2">
+          <button className="btn-bridge flex items-center gap-2">
             <Bot className="w-4 h-4" />
-            Meet Your AI Co-Pilot
+            Meet Your AI Mission Advisor
           </button>
         )}
       </DialogTrigger>
@@ -63,14 +63,14 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
         <div className="space-y-6 mt-4">
           {/* Core Stats */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="cockpit-screen p-4 text-center">
+            <div className="bridge-screen p-4 text-center">
               <Clock className="w-5 h-5 mx-auto mb-2 text-secondary" />
               <p className="text-2xl font-bold digital-display">
-                {coPilotStats.flightHours.toLocaleString()}
+                {coPilotStats.diveHours.toLocaleString()}
               </p>
-              <p className="text-xs text-muted-foreground">Flight Hours</p>
+              <p className="text-xs text-muted-foreground">Dive Hours</p>
             </div>
-            <div className="cockpit-screen p-4 text-center">
+            <div className="bridge-screen p-4 text-center">
               <Award className="w-5 h-5 mx-auto mb-2 text-warning" />
               <p className="text-2xl font-bold digital-display">
                 {coPilotStats.missionsCompleted.toLocaleString()}
@@ -80,15 +80,15 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
           </div>
 
           {/* Expertise Level */}
-          <div className="cockpit-panel p-4">
+          <div className="bridge-panel p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">Expertise Level</span>
               <span className="font-display text-success">{coPilotStats.expertiseLevel}</span>
             </div>
             <div className="h-3 bg-muted rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-primary via-secondary to-success w-full"
-                style={{ 
+                style={{
                   background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--success)) 100%)',
                 }}
               />
@@ -102,8 +102,8 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {coPilotStats.specializations.map(({ icon: Icon, label, value }) => (
-                <div 
-                  key={label} 
+                <div
+                  key={label}
                   className="flex items-center gap-2 p-2 bg-muted/50 rounded border border-primary/20"
                 >
                   <Icon className="w-4 h-4 text-primary flex-shrink-0" />
@@ -123,7 +123,7 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
             </h4>
             <div className="flex flex-wrap gap-2">
               {coPilotStats.certifications.map((cert) => (
-                <span 
+                <span
                   key={cert}
                   className="px-2 py-1 text-xs bg-success/10 text-success rounded border border-success/30"
                 >
@@ -136,7 +136,7 @@ export function AICoPilotModal({ trigger }: AICoPilotModalProps) {
           {/* Version info */}
           <div className="text-center pt-2 border-t border-muted">
             <p className="text-xs text-muted-foreground">
-              System Version: <span className="font-mono">{coPilotStats.version}</span> • 
+              System Version: <span className="font-mono">{coPilotStats.version}</span> •
               Status: <span className="text-success">Operational</span>
             </p>
           </div>

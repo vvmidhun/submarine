@@ -10,7 +10,7 @@ const getAudioContext = (): AudioContext => {
   return audioContext;
 };
 
-export function useCockpitSounds() {
+export function useBridgeSounds() {
   const engineOscillator = useRef<OscillatorNode | null>(null);
   const engineGain = useRef<GainNode | null>(null);
 

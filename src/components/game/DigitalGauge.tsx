@@ -29,15 +29,15 @@ export function DigitalGauge({
   };
 
   return (
-    <div className={cn('cockpit-screen flex flex-col items-center', sizeClasses[size])}>
-      <span className="text-[10px] font-display uppercase tracking-wider text-muted-foreground mb-1">
+    <div className={cn('bridge-screen border-cyan-500/30 flex flex-col items-center', sizeClasses[size])}>
+      <span className="text-[10px] font-display uppercase tracking-wider text-cyan-400/70 mb-1">
         {label}
       </span>
-      
+
       <div className={cn(
         'font-mono font-bold',
         valueSizes[size],
-        status === 'normal' && 'digital-display',
+        status === 'normal' && 'text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]',
         status === 'warning' && 'text-warning',
         status === 'danger' && 'text-destructive animate-pulse'
       )}>
